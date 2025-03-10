@@ -4,7 +4,7 @@ function App() {
   return (
     <>
       <div className="flex flex-col h-screen bg-amber-200">
-        <Header></Header>
+        <Header notLandingPage={false}/>
         <div className="flex-1 mt-12 bg-gray-700 text-center items-center justify-center">
             <div className="flex flex-col mt-40 text-center bg-amber-50">
                   <div className="mb-10 text-8xl">RoTypeAi</div>
