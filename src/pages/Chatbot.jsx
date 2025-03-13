@@ -50,7 +50,7 @@ function Chatbot() {
     return(
         <>
             <h1>This is the chatbot page</h1>
-            <Typing paragraph={paragraph} updateParagraph={updateParagraph}/>
+            <Typing paragraph={paragraph} results={results} updateParagraph={updateParagraph} updateResults={updateResults} />
         </>
     );
 }
