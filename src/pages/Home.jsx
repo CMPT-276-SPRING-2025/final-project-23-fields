@@ -17,17 +17,17 @@ function Home() {
                             <div className="text-3xl mb-8">
                             How to Use
                             </div>
-                            <div>
+                            <div className="text-xl">
                             Guided Tutorial
                             </div>
                         </div>
                       </Link>
                       <Link to="/Chatbot" className=" cursor-pointer">
-                        <div className="text-white font-jost bg-gray-700 flex flex-col justify-center h-full">
+                        <div className="text-white font-jost bg-gray-700 flex flex-col justify-center h-full shadow-md rounded-md">
                             <div className="text-3xl mb-8">
                               Jump In
                             </div>
-                            <div>
+                            <div className="text-xl">
                               Start Typing
                             </div>
                         </div>
