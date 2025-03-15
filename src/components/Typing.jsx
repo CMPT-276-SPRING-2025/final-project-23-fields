@@ -112,12 +112,13 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     <>
       <h1>This is a Typing Test</h1>
       <button onClick={()=>updateParagraph("Lorem ipsum dolor sit amet consectetur adipiscing elit")}>Text</button>
-      <div id="typingtest" tabIndex="0" className="bg-red-300 focus:bg-blue-300">
-        <div id="header">
-          <div id="timer"></div>
-        </div>
-        <div id="words"></div>
+      <div id="typingtestheader">
+        <div id="timer"></div>
+      </div>
+      <div id="typingtest" tabIndex="0" className="group relative leading-8 h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
+        <div id="words" className="blur-sm group-focus:blur-none"></div>
         <div id="cursor"></div>
+        <div id="focus-error" className="absolute pt-8 text-center inset-0 group-focus:hidden">Click here to resume</div>
       </div>
     </>
   )
