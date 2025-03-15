@@ -59,14 +59,14 @@ function Tutorial() {
                         <div className="border-2">
                             <img className="w-337.5 h-162.5 object-contain"src={Images[image].url} alt={Images[image].alt}></img>
                         </div >
-                        <div className="mt-10 grid grid-cols-[200px_200px] grid-rows-[75px] bg-amber-900 gap-x-14">
+                        <div className="mt-10 grid grid-cols-[200px_200px] grid-rows-[75px] gap-x-14">
                             <button className="cursor-pointer" onClick={imageLast}>
-                                <div className="bg-gray-700 flex items-center justify-center h-full text-3xl ">
+                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl ">
                                     Back
                                 </div>
                             </button>
                             <button className="cursor-pointer" onClick={imageNext}>
-                                <div className="bg-blue-300 flex items-center justify-center h-full text-3xl">
+                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
                                     Next
                                 </div>
                             </button>
