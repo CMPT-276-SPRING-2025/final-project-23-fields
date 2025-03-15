@@ -23,7 +23,7 @@ function Home() {
                         </div>
                       </Link>
                       <Link to="/Chatbot" className=" cursor-pointer">
-                        <div className="rounded-md shadow-md text-white font-jost bg-gray-700 flex flex-col justify-center h-full">
+                        <div className="text-white font-jost bg-gray-700 flex flex-col justify-center h-full">
                             <div className="text-3xl mb-8">
                               Jump In
                             </div>

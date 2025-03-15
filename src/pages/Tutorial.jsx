@@ -55,23 +55,19 @@ function Tutorial() {
         <>
                 <Header notLandingPage={true}/>
                 <section>
-                    <div className="pt-20 flex flex-col bg-gray-700 items-center justify-center h-screen">
+                    <div className="pt-20 flex flex-col bg-zinc-800 items-center justify-center h-screen">
                         <div className="border-2">
                             <img className="w-337.5 h-162.5 object-contain"src={Images[image].url} alt={Images[image].alt}></img>
                         </div >
                         <div className="mt-10 grid grid-cols-[200px_200px] grid-rows-[75px] bg-amber-900 gap-x-14">
                             <button className="cursor-pointer" onClick={imageLast}>
-                                <div className="bg-pink-300 flex items-center justify-center h-full">
-                                    <div className="text-3xl">
+                                <div className="bg-gray-700 flex items-center justify-center h-full text-3xl ">
                                     Back
-                                    </div>
                                 </div>
                             </button>
                             <button className="cursor-pointer" onClick={imageNext}>
-                                <div className="bg-blue-300 flex items-center justify-center h-full">
-                                    <div className="text-3xl">
+                                <div className="bg-blue-300 flex items-center justify-center h-full text-3xl">
                                     Next
-                                    </div>
                                 </div>
                             </button>
                         </div>
