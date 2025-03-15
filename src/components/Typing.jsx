@@ -18,7 +18,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       const currentLetter = document.querySelector('.letter.current');
       const expectedKey = currentLetter ? currentLetter.innerHTML : ' ';
       const isSpace = key == ' ';
-      const isBackspace = key.length != 1;
+      const isBackspace = key == 'Backspace';
+      const isFirstLetter = currentLetter == currentWord.firstChild;
 
       console.log(key + " : " + expectedKey)
       // Condition: Valid key is pressed
@@ -31,7 +32,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         // Condition: At the end of the word
         } else {
           const letterSpan = document.createElement("span");
-          addClass(letterSpan, wrongKeyClasses.concat(["letter"]))
+          addClass(letterSpan, wrongKeyClasses.concat(["letter", "extraletter"]))
           letterSpan.innerHTML = key;
           currentWord.appendChild(letterSpan);
         }
@@ -51,6 +52,34 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           removeClass(currentLetter, 'current');
         }
         addClass(currentWord.nextSibling.firstChild, 'current');
+      // Condition: Backspace key pressed
+      } else if(isBackspace) {
+        // Condition: Ignore very first word of paragraph
+        if (currentLetter && isFirstLetter && !currentWord.previousSibling) {
+        // Condition: On first letter of the word
+        } else if (currentLetter && isFirstLetter) {
+          removeClass(currentWord, 'current');
+          addClass(currentWord.previousSibling, 'current');
+          removeClass(currentLetter, 'current');
+          if (!currentWord.previousSibling.lastChild.classList.contains("extraletter")) {
+            addClass(currentWord.previousSibling.lastChild, 'current');
+            removeClass(currentWord.previousSibling.lastChild, correctKeyClasses.concat(wrongKeyClasses));
+          }
+        // Condition: In the middle of a word
+        } else if (currentLetter && !isFirstLetter) {
+          removeClass(currentLetter, 'current');
+          addClass(currentLetter.previousSibling, 'current');
+          removeClass(currentLetter.previousSibling, correctKeyClasses.concat(wrongKeyClasses));
+          if (currentLetter.classList.contains("extraletter"))
+            currentLetter.remove();
+        } else if (!currentLetter) {
+          if (currentWord.lastChild.classList.contains("extraletter")) {
+            currentWord.lastChild.remove();
+          } else {
+            addClass(currentWord.lastChild, 'current');
+            removeClass(currentWord.lastChild, correctKeyClasses.concat(wrongKeyClasses));
+          }
+        }
       }
     };
 
@@ -111,14 +140,14 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   return (
     <>
       <h1>This is a Typing Test</h1>
-      <button onClick={()=>updateParagraph("Lorem ipsum dolor sit amet consectetur adipiscing elit")}>Text</button>
+      <button onClick={()=>updateParagraph("Lorem ipsum dolor sit amet consectetur adipiscing elit")}>Test Button</button>
       <div id="typingtestheader">
         <div id="timer"></div>
       </div>
       <div id="typingtest" tabIndex="0" className="group relative leading-8 h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
         <div id="words" className="blur-sm group-focus:blur-none"></div>
-        <div id="cursor"></div>
-        <div id="focus-error" className="absolute pt-8 text-center inset-0 group-focus:hidden">Click here to resume</div>
+        <div id="cursor" className="hidden"></div>
+        <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
       </div>
     </>
   )
