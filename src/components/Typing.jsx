@@ -46,12 +46,15 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           });
         }
         // Move onto next word
-        removeClass(currentWord, 'current');
-        addClass(currentWord.nextSibling, 'current');
-        if (currentLetter) {
-          removeClass(currentLetter, 'current');
-        }
-        addClass(currentWord.nextSibling.firstChild, 'current');
+        if (currentWord.nextSibling) {
+          removeClass(currentWord, 'current');
+          addClass(currentWord.nextSibling, 'current');
+          if (currentLetter) {
+            removeClass(currentLetter, 'current');
+          }
+          addClass(currentWord.nextSibling.firstChild, 'current');
+        }   
+        
       // Condition: Backspace key pressed
       } else if(isBackspace) {
         // Condition: Ignore very first word of paragraph
