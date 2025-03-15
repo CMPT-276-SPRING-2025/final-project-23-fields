@@ -58,7 +58,7 @@ function Chatbot() {
     useEffect(() => {
         if (botResponse.startsWith('true')) {
             const typingTestText = botResponse.split('true')[1].trim();
-            updateParagraph(typingTestText);
+            setParagraph({ text: typingTestText });
         } else if (botResponse.startsWith('false')) {
             setBotResponse(botResponse.split('false')[1].trim());
         }
