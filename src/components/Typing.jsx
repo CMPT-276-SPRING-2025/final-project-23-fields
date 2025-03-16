@@ -5,6 +5,13 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   const correctKeyClasses = ['correct', 'text-white'];
   const wrongKeyClasses = ['wrong', 'text-red-500'];
 
+  const sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
+  // Helper function sanitize text
+  function sanitizeParagraph(paragraph) {
+    return paragraph.replace(/[^\w\s]/gi, '').toLowerCase();
+  }
+
   // On paragraph update
   useEffect(() => {
     console.log(paragraph);
@@ -127,7 +134,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   function populateWords(paragraph) {
     if (paragraph.text == null) return;
 
-    wordArray = paragraph.text.split(" ");
+    wordArray = sanitizeParagraph(paragraph.text).split(" ");
     const words = document.getElementById('words');
 
     words.innerHTML = "";
@@ -143,13 +150,13 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   return (
     <>
       <h1>This is a Typing Test</h1>
-      <button onClick={()=>updateParagraph("Lorem ipsum dolor sit amet consectetur adipiscing elit")}>Test Button</button>
+      <button onClick={()=>updateParagraph(sampleText)}>Test Button</button>
       <div id="typingtestheader">
         <div id="timer"></div>
       </div>
       <div id="typingtest" tabIndex="0" className="group relative leading-8 h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
         <div id="words" className="blur-sm group-focus:blur-none"></div>
-        <div id="cursor" className="hidden"></div>
+        <div id="cursor" className="fixed w-0.5 h-6 bg-black"></div>
         <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
       </div>
     </>
