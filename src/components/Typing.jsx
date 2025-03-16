@@ -20,12 +20,14 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   useEffect(() => {
     const keyPress = (event) => {
       const key = event.key;
+      const isSpace = key == ' ';
+      const isBackspace = key == 'Backspace';
+      if (key.length == 1 && !(key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z')) return;
+      if (key.length > 1 && !isSpace && !isBackspace) return;
       const currentWord = document.querySelector('.word.current');
       const currentLetter = document.querySelector('.letter.current');
       if (!currentWord) return;
       const expectedKey = currentLetter ? currentLetter.innerHTML : ' ';
-      const isSpace = key == ' ';
-      const isBackspace = key == 'Backspace';
       const isFirstLetter = currentLetter == currentWord.firstChild;
 
       console.log(key + " : " + expectedKey)
