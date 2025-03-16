@@ -38,11 +38,14 @@ function Tutorial() {
     // Creates an array from 1 through 5 based on size of Images
     const Prog = Array.apply(null, Array(Images.length)).map(function (j, i){ return (i+1).toString();});
 
+
     const [progCheck, setProgCheck] = useState(0);
 
     const [image, setImage] = useState(0);
 
+    // Moves to the previous image
     const imageLast = () => {
+        // If its the first image, goes to Home, else moves to previous
         if (image === 0) {
             navigate('/');
         }
@@ -51,8 +54,10 @@ function Tutorial() {
             setProgCheck(progCheck - 1);
         }
     };
-    
+
+    // Moves to the next image
     const imageNext = () => {
+        // If its last image, goes to Chatbot, else moves to next
         if (image === Images.length - 1) {
             navigate('/Chatbot');
         }

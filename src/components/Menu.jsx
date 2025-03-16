@@ -5,6 +5,7 @@ function Menu() {
 
     const [expanded, setExpanded] = useState(false);
 
+    // Negates expanded
     const Expand = () => {
         setExpanded(!expanded)
     };
