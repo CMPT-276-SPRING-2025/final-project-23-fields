@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true you print the typing test after true with a one-line gap and no other responses, else print false at the start of every response if replying normally",
+    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true you print the typing test after true with a one-line gap and no other responses, else print false at the start of every response if replying normally. Do not add words with contractions.",
 });
 
 const generationConfig = {

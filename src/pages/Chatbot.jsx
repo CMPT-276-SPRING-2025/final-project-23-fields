@@ -19,7 +19,7 @@ function Chatbot() {
     // @slowLetters (dictionary) letters user took the longest time on
     const [results, setResults] = useState({
         wpm: null,
-        accuracy: null, 
+        accuracy: null,
         // structure for missedLetters and slowLetters:
         // missedLetters {
         //   A: 2
@@ -28,23 +28,28 @@ function Chatbot() {
         // }
         missedLetters: null,
         slowLetters: null
-     });
-    
+    });
+
+    // Function to sanitize text (convert to lowercase and remove special symbols)
+    const sanitizeText = (text) => {
+        return text.toLowerCase().replace(/[.,'"!?]/g, '');
+    };
+
     // updateParagraph(text)
     // @text (string) generated typing test data
-    const updateParagraph = useCallback((text)=>{
+    const updateParagraph = useCallback((text) => {
         setParagraph({
             ...paragraph,
-            text: text
+            text: sanitizeText(text)
         })
     });
-    
+
     // updateResults(wpm, accuracy, missedLetters, slowLetters)
     // @wpm (int) words per minute
     // @accuracy (int) percent of letters typed right
     // @missedLetters (dictionary) letters user made most errors on
     // @slowLetters (dictionary) letters user took the longest time on
-    const updateResults = useCallback((wpm, accuracy, missedLetters, slowLetters)=>{
+    const updateResults = useCallback((wpm, accuracy, missedLetters, slowLetters) => {
         setResults({
             ...results,
             text: wpm,
@@ -75,7 +80,7 @@ function Chatbot() {
         <div>
             <h1>This is the chatbot page</h1>
             <form onSubmit={handleSubmit}>
-                <input 
+                <input
                     type="text"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
