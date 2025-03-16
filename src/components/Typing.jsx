@@ -179,7 +179,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       </div>
       <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
         <div id="words" className="blur-sm group-focus:blur-none"></div>
-        <div id="cursor" className="fixed w-0.5 h-6 bg-black"></div>
+        <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
         <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
       </div>
     </>
