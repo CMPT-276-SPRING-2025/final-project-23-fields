@@ -89,7 +89,7 @@ function Chatbot() {
                 <button type="submit">Send</button>
             </form>
             {paragraph.text ? (
-                <Typing paragraph={paragraph} updateParagraph={updateParagraph} />
+                <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults}/>
             ) : (
                 <p>Bot: {botResponse}</p>
             )}
