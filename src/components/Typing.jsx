@@ -22,8 +22,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       const key = event.key;
       const isSpace = key == ' ';
       const isBackspace = key == 'Backspace';
-      if (key.length == 1 && !(key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z')) return;
-      if (key.length > 1 && !isSpace && !isBackspace) return;
+      if (key.length == 1 && !(key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z') && !isSpace) return;
+      if (key.length > 1 && !isBackspace) return;
       const currentWord = document.querySelector('.word.current');
       const currentLetter = document.querySelector('.letter.current');
       if (!currentWord) return;
