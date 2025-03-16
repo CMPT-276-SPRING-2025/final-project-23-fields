@@ -22,6 +22,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       const key = event.key;
       const currentWord = document.querySelector('.word.current');
       const currentLetter = document.querySelector('.letter.current');
+      if (!currentWord) return;
       const expectedKey = currentLetter ? currentLetter.innerHTML : ' ';
       const isSpace = key == ' ';
       const isBackspace = key == 'Backspace';
@@ -91,6 +92,23 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         }
       }
 
+      const typingTest = document.getElementById('typingtest');
+      const typingRect = typingTest.getBoundingClientRect();
+      if (currentWord.getBoundingClientRect().top > typingRect.top + (typingRect.height / 2)) {     
+        let iWord = document.getElementById('words').firstChild;
+        while (iWord.getBoundingClientRect().top < typingRect.top + (typingRect.height / 4)) {
+          iWord = iWord.nextSibling;
+        }
+        iWord = iWord.previousSibling;
+        while (iWord.previousSibling != null) {
+          iWord = iWord.previousSibling;
+          iWord.nextSibling.remove();
+        }
+        iWord.remove();
+        console.log(currentWord.getBoundingClientRect().top + " : bigger!")
+      }
+
+      // Move cursor
       const nextLetter = document.querySelector('.letter.current');
       const nextWord = document.querySelector('.word.current');
       const cursor = document.getElementById('cursor');
@@ -159,7 +177,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       <div id="typingtestheader">
         <div id="timer"></div>
       </div>
-      <div id="typingtest" tabIndex="0" className="group relative leading-8 h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
+      <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
         <div id="words" className="blur-sm group-focus:blur-none"></div>
         <div id="cursor" className="fixed w-0.5 h-6 bg-black"></div>
         <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
