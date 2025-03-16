@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 
 export default function Typing({ paragraph, results, updateParagraph, updateResults }) {
-  let wordArray;
   const correctKeyClasses = ['correct', 'text-white'];
   const wrongKeyClasses = ['wrong', 'text-red-500'];
 
@@ -91,6 +90,12 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           }
         }
       }
+
+      const nextLetter = document.querySelector('.letter.current');
+      const nextWord = document.querySelector('.word.current');
+      const cursor = document.getElementById('cursor');
+      cursor.style.top = `${(nextLetter || nextWord).getBoundingClientRect().top}px`;
+      cursor.style.left = `${(nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right']}px`;
     };
 
     document.getElementById("typingtest").addEventListener('keyup', keyPress);
@@ -134,7 +139,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   function populateWords(paragraph) {
     if (paragraph.text == null) return;
 
-    wordArray = sanitizeParagraph(paragraph.text).split(" ");
+    const wordArray = sanitizeParagraph(paragraph.text).split(" ");
     const words = document.getElementById('words');
 
     words.innerHTML = "";
