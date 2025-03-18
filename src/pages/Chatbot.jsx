@@ -7,6 +7,10 @@ function Chatbot() {
     const [paragraph, setParagraph] = useState({
         text: null
     });
+
+    // (int) time limit of typing test in milliseconds (default is 30000)
+    const [typingTime, setTypingTime] = useState(30000);
+
     // State for storing user input from text box
     const [userInput, setUserInput] = useState('');
 
@@ -52,7 +56,7 @@ function Chatbot() {
     const updateResults = useCallback((wpm, accuracy, missedLetters, slowLetters) => {
         setResults({
             ...results,
-            text: wpm,
+            wpm: wpm,
             accuracy: accuracy,
             missedLetters: missedLetters,
             slowLetters: slowLetters
@@ -89,10 +93,11 @@ function Chatbot() {
                 <button type="submit">Send</button>
             </form>
             {paragraph.text ? (
-                <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults}/>
+                <p>e</p>//<Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults}/>
             ) : (
                 <p>Bot: {botResponse}</p>
             )}
+            <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
         </div>
     );
 }
