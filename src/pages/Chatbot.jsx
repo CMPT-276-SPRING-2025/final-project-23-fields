@@ -56,7 +56,7 @@ function Chatbot() {
     const updateResults = useCallback((wpm, accuracy, missedLetters, slowLetters) => {
         setResults({
             ...results,
-            text: wpm,
+            wpm: wpm,
             accuracy: accuracy,
             missedLetters: missedLetters,
             slowLetters: slowLetters

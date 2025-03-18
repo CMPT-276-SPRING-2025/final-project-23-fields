@@ -50,7 +50,25 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
 
   function getResults() {
     console.log(analytics);
+    let wpm, accuracy;
+    const wpmElement = document.getElementById('wpm');
+    const accuracyElement = document.getElementById('accuracy');
+    const timerElement = document.getElementById('elapsedTime');
+
+    wpm = Math.round((analytics.correctLetters / 5) / (typingTime / 60000));
+    console.log(Math.round((analytics.correctLetters / 5) / (typingTime / 60)))
+    accuracy = Math.round((analytics.correctLetters / analytics.totalLetters) * 100);
+
+    wpmElement.innerHTML = `${wpm}`;
+    accuracyElement.innerHTML = `${accuracy}%`;
+    timerElement.innerHTML = `${typingTime / 1000} seconds`;
+
+    updateResults(wpm, accuracy, analytics.missedLetters, analytics.slowLetters);
   }
+
+  useEffect(()=>{
+    console.log(results);
+  }, [results])
 
   function endTest() {
     clearInterval(window.timer);
@@ -74,7 +92,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     const isFirstLetter = currentLetter == currentWord.firstChild;
     const currentTime = (new Date()).getTime();
 
-    if (!window.timer && !isBackspace && !isSpace) {
+    if (!window.timer && !isBackspace) {
       window.gameStart = (new Date()).getTime();
       window.lastKeyStroke = window.gameStart;
       window.timer = setInterval(()=> {
@@ -97,12 +115,6 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     
     const lapsedTime = currentTime - window.lastKeyStroke;
     window.lastKeyStroke = currentTime;
-
-    if (analytics.totalLetters > 10 && lapsedTime > analytics.averageTime * 1.25 ) {
-      analytics.slowLetters[expectedKey] = analytics.slowLetters[expectedKey] ? analytics.slowLetters[expectedKey]++ : 1;
-    }
-
-    analytics.averageTime = ((analytics.totalLetters-1) * analytics.averageTime + lapsedTime) / analytics.totalLetters;
     
     // Condition: Valid key is pressed
     if (!isBackspace && !isSpace) {
@@ -110,11 +122,13 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       if (currentLetter) {
         addClass(currentLetter, key === expectedKey ? correctKeyClasses: wrongKeyClasses);
         // Analytics
-        if (key == expectedKey) {
+        if (key == expectedKey)
           analytics.correctLetters++;
-        } else {
-          analytics.missedLetters[expectedKey] = analytics.missedLetters[expectedKey] ? analytics.missedLetters[expectedKey]++ : 1;
-        }
+        else
+          analytics.missedLetters[expectedKey] = analytics.missedLetters[expectedKey] ? analytics.missedLetters[expectedKey] + 1 : 1;
+        if (analytics.totalLetters > 10 && lapsedTime > analytics.averageTime * 1.25 )
+          analytics.slowLetters[expectedKey] = analytics.slowLetters[expectedKey] ? analytics.slowLetters[expectedKey] + 1 : 1;
+
         removeClass(currentLetter, 'current');
         if (currentLetter.nextSibling) addClass(currentLetter.nextSibling, 'current');
       // Condition: At the end of the word
@@ -131,6 +145,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         const invalidatedLetters = [...document.querySelectorAll('.word.current .letter:not(correct)')];
         invalidatedLetters.forEach(l => {
           addClass(l, wrongKeyClasses);
+          analytics.missedLetters[l.innerHTML] = analytics.missedLetters[l.innerHTML] ? analytics.missedLetters[l.innerHTML] + 1 : 1;
+          analytics.totalLetters++;
         });
       } else {
         analytics.correctLetters++;
@@ -174,7 +190,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         }
       }
     }
+    analytics.averageTime = ((analytics.totalLetters-1) * analytics.averageTime + lapsedTime) / analytics.totalLetters;
 
+    // Autoscroll words
     const typingTest = document.getElementById('typingtest');
     const typingRect = typingTest.getBoundingClientRect();
     if (currentWord.getBoundingClientRect().top > typingRect.top + (typingRect.height / 2)) {     
@@ -258,21 +276,21 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
           <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
         </div>
-        <div id="resultscontainer" className="hidden">
-          <h1>Results</h1>
-          <div>
-            <span>WPM</span>
-            <span id="wpm">0</span>
-          </div>
-          <div>
-            <span>ACC</span>
-            <span id="accuracy">0%</span>
-          </div>
-          <div>
-            <span>0 Seconds</span>
-          </div>
-        </div>
       </div>
+      <div id="resultscontainer" className="hidden">
+        <h1>Results</h1>
+        <div>
+          <span>WPM</span>
+          <span id="wpm">0</span>
+        </div>
+        <div>
+          <span>ACC</span>
+          <span id="accuracy">0%</span>
+        </div>
+        <div>
+          <span id="elapsedTime">0 Seconds</span>
+        </div>
+        </div>
     </>
   )
 }
