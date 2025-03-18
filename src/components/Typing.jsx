@@ -7,6 +7,10 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   const sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
   window.timer = null;
   window.testStart = null;
+  window.lastKeyStroke = null;
+
+  /////////////////////////////// Analytics ///////////////////////////////
+  /***********************************************************************/
 
   const analytics = {
     correctLetters: 0,
@@ -14,6 +18,14 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     missedLetters: {},
     slowLetters: {},
     averageTime: 0,
+  }
+
+  function setAnalytics(correct, total, missed, slow, avg) {
+    analytics.correctLetters = correct;
+    analytics.totalLetters = total;
+    analytics.missedLetters = missed;
+    analytics.slowLetters = slow;
+    analytics.averageTime = avg;
   }
 
   // Helper function to sanitize text
@@ -25,8 +37,11 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   useEffect(() => {
     if (!paragraph.text) return
     document.getElementById("typingtestcontainer").style.display = 'block';
+    document.getElementById("resultscontainer").style.display = 'none';
 
     document.getElementById("typingtest").addEventListener('keyup', keyPress);
+
+    setAnalytics(0,0,{},{},0);
 
     console.log(paragraph);
     populateWords(paragraph);
@@ -34,12 +49,14 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   }, [paragraph]);
 
   function getResults() {
-
+    console.log(analytics);
   }
 
   function endTest() {
     clearInterval(window.timer);
+    getResults();
     document.getElementById("typingtestcontainer").style.display = 'none';
+    document.getElementById("resultscontainer").style.display = 'block';
 
     document.getElementById("typingtest").removeEventListener('keyup', keyPress);
   }
@@ -55,9 +72,11 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     if (!currentWord) return;
     const expectedKey = currentLetter ? currentLetter.innerHTML : ' ';
     const isFirstLetter = currentLetter == currentWord.firstChild;
+    const currentTime = (new Date()).getTime();
 
     if (!window.timer && !isBackspace && !isSpace) {
       window.gameStart = (new Date()).getTime();
+      window.lastKeyStroke = window.gameStart;
       window.timer = setInterval(()=> {
         const deltaTime = ((new Date()).getTime() - window.gameStart);
         const remainingTime = Math.round((typingTime - deltaTime) / 1000);
@@ -72,12 +91,30 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         }
       }, 1000)
     }
-    console.log(key + " : " + expectedKey)
+    
+    // Increment characters typed count
+    analytics.totalLetters++;
+    
+    const lapsedTime = currentTime - window.lastKeyStroke;
+    window.lastKeyStroke = currentTime;
+
+    if (analytics.totalLetters > 10 && lapsedTime > analytics.averageTime * 1.25 ) {
+      analytics.slowLetters[expectedKey] = analytics.slowLetters[expectedKey] ? analytics.slowLetters[expectedKey]++ : 1;
+    }
+
+    analytics.averageTime = ((analytics.totalLetters-1) * analytics.averageTime + lapsedTime) / analytics.totalLetters;
+    
     // Condition: Valid key is pressed
     if (!isBackspace && !isSpace) {
       // Condition: Not at the end of the word
       if (currentLetter) {
         addClass(currentLetter, key === expectedKey ? correctKeyClasses: wrongKeyClasses);
+        // Analytics
+        if (key == expectedKey) {
+          analytics.correctLetters++;
+        } else {
+          analytics.missedLetters[expectedKey] = analytics.missedLetters[expectedKey] ? analytics.missedLetters[expectedKey]++ : 1;
+        }
         removeClass(currentLetter, 'current');
         if (currentLetter.nextSibling) addClass(currentLetter.nextSibling, 'current');
       // Condition: At the end of the word
@@ -95,6 +132,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         invalidatedLetters.forEach(l => {
           addClass(l, wrongKeyClasses);
         });
+      } else {
+        analytics.correctLetters++;
       }
       // Move onto next word
       if (currentWord.nextSibling) {
@@ -149,7 +188,6 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         iWord.nextSibling.remove();
       }
       iWord.remove();
-      console.log(currentWord.getBoundingClientRect().top + " : bigger!")
     }
 
     // Move cursor
@@ -221,8 +259,17 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
         </div>
         <div id="resultscontainer" className="hidden">
-          <div id="wpm">
-
+          <h1>Results</h1>
+          <div>
+            <span>WPM</span>
+            <span id="wpm">0</span>
+          </div>
+          <div>
+            <span>ACC</span>
+            <span id="accuracy">0%</span>
+          </div>
+          <div>
+            <span>0 Seconds</span>
           </div>
         </div>
       </div>
