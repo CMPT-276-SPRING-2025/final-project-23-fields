@@ -65,11 +65,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
 
     updateResults(wpm, accuracy, analytics.missedLetters, analytics.slowLetters);
   }
-
-  useEffect(()=>{
-    console.log(results);
-  }, [results])
-
+  
   function endTest() {
     clearInterval(window.timer);
     getResults();
