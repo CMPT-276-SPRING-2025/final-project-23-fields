@@ -71,7 +71,7 @@ function Tutorial() {
         <>
                 <Header notLandingPage={true}/>
                 <section>
-                    <div className="pt-20 flex flex-col bg-gray-700 items-center justify-center h-screen">
+                    <div className="pt-20 flex flex-col bg-zinc-800 items-center justify-center h-screen">
                         <Progress Prog={Prog} progCheck={progCheck}/>
                         <div className="border-2">
                             <img className="w-337.5 h-162.5 object-contain"src={Images[image].url} alt={Images[image].alt}></img>
