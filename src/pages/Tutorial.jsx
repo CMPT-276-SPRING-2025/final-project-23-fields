@@ -1,4 +1,5 @@
 import Header from '../components/Header.jsx'
+import Progress from '../components/Progress.jsx'
 import {useState} from 'react'
 import { useNavigate } from 'react-router';
 
@@ -28,26 +29,41 @@ function Tutorial() {
             url: "https://placehold.co/1100x650",
             alt: "Image5"
         },
+        {
+            url: "https://placehold.co/1100x600",
+            alt: "Image6"
+        },
     ];
 
+    // Creates an array from 1 through 5 based on size of Images
+    const Prog = Array.apply(null, Array(Images.length)).map(function (j, i){ return (i+1).toString();});
+
+
+    const [progCheck, setProgCheck] = useState(0);
 
     const [image, setImage] = useState(0);
 
+    // Moves to the previous image
     const imageLast = () => {
+        // If its the first image, goes to Home, else moves to previous
         if (image === 0) {
             navigate('/');
         }
         else {
             setImage(image - 1);
+            setProgCheck(progCheck - 1);
         }
     };
-    
+
+    // Moves to the next image
     const imageNext = () => {
+        // If its last image, goes to Chatbot, else moves to next
         if (image === Images.length - 1) {
             navigate('/Chatbot');
         }
         else {
             setImage(image + 1);
+            setProgCheck(progCheck + 1);
         }
     };
 
@@ -55,7 +71,8 @@ function Tutorial() {
         <>
                 <Header notLandingPage={true}/>
                 <section>
-                    <div className="pt-20 flex flex-col bg-zinc-800 items-center justify-center h-screen">
+                    <div className="pt-20 flex flex-col bg-gray-700 items-center justify-center h-screen">
+                        <Progress Prog={Prog} progCheck={progCheck}/>
                         <div className="border-2">
                             <img className="w-337.5 h-162.5 object-contain"src={Images[image].url} alt={Images[image].alt}></img>
                         </div >

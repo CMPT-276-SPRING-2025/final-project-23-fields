@@ -1,9 +1,11 @@
 import Menu from './Menu.jsx'
 
-function Header(props) {
+function Header({notLandingPage}) {
     
+    // Checks if page is not landing page
     const renderCheck = () => {
-        if(props.notLandingPage) {
+        // if its not the landing page it returns menu dropdown, else it returns nothing
+        if(notLandingPage) {
             return  <Menu/>
         }
         else {
