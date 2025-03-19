@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import Typing from '../components/Typing.jsx';
-import { getGeminiResponse } from '../components/Gemini.jsx';
+import Gemini from '../components/Gemini.jsx';
 
-function Chatbot() {
+function Chatbot() {    
     // @text (string) generated typing test data
     const [paragraph, setParagraph] = useState({
         text: null
@@ -62,41 +62,14 @@ function Chatbot() {
             slowLetters: slowLetters
         })
     });
-
-    // useEffect to process bot response
-    useEffect(() => {
-        if (botResponse.startsWith('true')) {
-            const typingTestText = botResponse.split('true')[1].trim();
-            setParagraph({ text: typingTestText });
-        } else if (botResponse.startsWith('false')) {
-            setBotResponse(botResponse.split('false')[1].trim());
-        }
-    }, [botResponse]);
-
-    // Handle form submission (send user input to the chatbot)
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const response = await getGeminiResponse(userInput);
-        setBotResponse(response);
-    };
-
+    
     return (
         <div>
             <h1>This is the chatbot page</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Ask me anything..."
-                />
-                <button type="submit">Send</button>
-            </form>
-            {paragraph.text ? (
-                <p>e</p>//<Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults}/>
-            ) : (
-                <p>Bot: {botResponse}</p>
-            )}
+            <Gemini paragraph={paragraph} setParagraph={setParagraph} 
+            botResponse={botResponse} setBotResponse={setBotResponse} 
+            userInput={userInput} setUserInput={setUserInput} 
+            updateParagraph={updateParagraph}/>
             <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
         </div>
     );
