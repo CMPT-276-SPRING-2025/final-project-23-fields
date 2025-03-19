@@ -1,12 +1,19 @@
 import { useEffect, useState, useCallback } from 'react';
 import Typing from '../components/Typing.jsx';
-import { getGeminiResponse } from '../components/Gemini.jsx';
+import Gemini from '../components/Gemini.jsx';
 
-function Chatbot() {
+function Chatbot() {    
     // @text (string) generated typing test data
     const [paragraph, setParagraph] = useState({
         text: null
     });
+
+    // State for checking if the bot output is a typing test
+    const [isTypingTest, setIsTypingTest] = useState(false);
+
+    // (int) time limit of typing test in milliseconds (default is 30000)
+    const [typingTime, setTypingTime] = useState(30000);
+
     // State for storing user input from text box
     const [userInput, setUserInput] = useState('');
 
@@ -52,44 +59,19 @@ function Chatbot() {
     const updateResults = useCallback((wpm, accuracy, missedLetters, slowLetters) => {
         setResults({
             ...results,
-            text: wpm,
+            wpm: wpm,
             accuracy: accuracy,
             missedLetters: missedLetters,
             slowLetters: slowLetters
         })
     });
-
-    // useEffect to process bot response
-    useEffect(() => {
-        if (botResponse.startsWith('true')) {
-            const typingTestText = botResponse.split('true')[1].trim();
-            setParagraph({ text: typingTestText });
-        } else if (botResponse.startsWith('false')) {
-            setBotResponse(botResponse.split('false')[1].trim());
-        }
-    }, [botResponse]);
-
-    // Handle form submission (send user input to the chatbot)
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const response = await getGeminiResponse(userInput);
-        setBotResponse(response);
-    };
-
+    
     return (
         <div>
             <h1>This is the chatbot page</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Ask me anything..."
-                />
-                <button type="submit">Send</button>
-            </form>
-            {paragraph.text ? (
-                <Typing paragraph={paragraph} updateParagraph={updateParagraph} />
+            <Gemini paragraph={paragraph} setParagraph={setParagraph} botResponse={botResponse} setBotResponse={setBotResponse} isTypingTest={isTypingTest} setIsTypingTest={setIsTypingTest}/>
+            {isTypingTest && paragraph.text ? (
+                <Typing paragraph={{ text: paragraph }} />
             ) : (
                 <p>Bot: {botResponse}</p>
             )}
