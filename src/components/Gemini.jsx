@@ -28,8 +28,7 @@ export const getGeminiResponse = async (message, history = []) => {
     }
 };
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, setIsTypingTest, isTypingTest }) {
-    const [userInput, setUserInput] = useState('');
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput}) {
     const [history, setHistory] = useState([]);
 
     const sanitizeText = (text) => {
@@ -61,10 +60,9 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
             setBotResponse(""); // Clear bot response since it's a typing test
-            setIsTypingTest(true);
+            setParagraph({ text: typingTestText });
         } else {
             setBotResponse(response.slice(5).trim());
-            setIsTypingTest(false);
             setParagraph({ text: null });
         }
 
@@ -74,6 +72,12 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         ]);
         setUserInput('');
     };
+    
+    useEffect(() => {
+        if (paragraph.text) {
+            setBotResponse(""); // Clear bot response when a typing test starts
+        }
+    }, [paragraph]);
 
     useEffect(() => {
         const startConversation = async () => {
@@ -87,6 +91,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
 
     return (
         <div>
+            {!paragraph.text && <p>Bot: {botResponse}</p>}
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"

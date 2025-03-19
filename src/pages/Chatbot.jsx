@@ -8,9 +8,6 @@ function Chatbot() {
         text: null
     });
 
-    // State for checking if the bot output is a typing test
-    const [isTypingTest, setIsTypingTest] = useState(false);
-
     // (int) time limit of typing test in milliseconds (default is 30000)
     const [typingTime, setTypingTime] = useState(30000);
 
@@ -69,12 +66,8 @@ function Chatbot() {
     return (
         <div>
             <h1>This is the chatbot page</h1>
-            <Gemini paragraph={paragraph} setParagraph={setParagraph} botResponse={botResponse} setBotResponse={setBotResponse} isTypingTest={isTypingTest} setIsTypingTest={setIsTypingTest}/>
-            {isTypingTest && paragraph.text ? (
-                <Typing paragraph={{ text: paragraph }} />
-            ) : (
-                <p>Bot: {botResponse}</p>
-            )}
+            <Gemini paragraph={paragraph} setParagraph={setParagraph} botResponse={botResponse} setBotResponse={setBotResponse} userInput={userInput} setUserInput={setUserInput}/>
+            <Typing paragraph={{ text: paragraph }} />
         </div>
     );
 }
