@@ -28,20 +28,8 @@ export const getGeminiResponse = async (message, history = []) => {
     }
 };
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput}) {
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph}) {
     const [history, setHistory] = useState([]);
-
-    const sanitizeText = (text) => {
-        return text.toLowerCase().replace(/[.,'"!?]/g, ''); // Added return
-    };
-
-    const updateHistory = (userMessage, botMessage) => {
-        setHistory((prevHistory) => [...prevHistory, { user: userMessage, bot: botMessage }]);
-    };
-
-    const updateParagraph = useCallback((text) => {
-        setParagraph({ text: sanitizeText(text) }); // Ensures state is an object
-    }, [setParagraph]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,14 +48,13 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
             setBotResponse(""); // Clear bot response since it's a typing test
-            setParagraph({ text: typingTestText });
         } else {
             setBotResponse(response.slice(5).trim());
             setParagraph({ text: null });
         }
 
-        setHistory([
-            ...history,
+        setHistory((prevHistory) => [
+            ...prevHistory,
             { user: userInput, bot: response.slice(5).trim() }
         ]);
         setUserInput('');

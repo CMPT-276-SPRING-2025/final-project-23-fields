@@ -66,7 +66,10 @@ function Chatbot() {
     return (
         <div>
             <h1>This is the chatbot page</h1>
-            <Gemini paragraph={paragraph} setParagraph={setParagraph} botResponse={botResponse} setBotResponse={setBotResponse} userInput={userInput} setUserInput={setUserInput}/>
+            <Gemini paragraph={paragraph} setParagraph={setParagraph} 
+            botResponse={botResponse} setBotResponse={setBotResponse} 
+            userInput={userInput} setUserInput={setUserInput} 
+            updateParagraph={updateParagraph}/>
             <Typing paragraph={{ text: paragraph }} />
         </div>
     );
