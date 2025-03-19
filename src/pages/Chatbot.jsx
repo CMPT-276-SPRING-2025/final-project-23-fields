@@ -70,7 +70,7 @@ function Chatbot() {
             botResponse={botResponse} setBotResponse={setBotResponse} 
             userInput={userInput} setUserInput={setUserInput} 
             updateParagraph={updateParagraph}/>
-            <Typing paragraph={{ text: paragraph }} />
+            <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
         </div>
     );
 }
