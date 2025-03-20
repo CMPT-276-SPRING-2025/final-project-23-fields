@@ -261,6 +261,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
 
   return (
     <>
+      {/*
       <h1>This is a Typing Test</h1>
       <button onClick={()=>updateParagraph(sampleText)}>Test Button</button>
       <div id="typingtestcontainer" className="hidden">
@@ -286,6 +287,15 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         <div>
           <span id="elapsedTime">0 Seconds</span>
         </div>
+        </div>
+        */}
+        <div className="bg-zinc-800 inline-flex flex-col items-center justify-center">
+              <div className="bg-amber-200 h-100 w-200 flex justify-center items-center rounded-md">
+                  <div>Typing</div>
+              </div>
+              <div className="mt-10 bg-amber-50 px-10 py-3.5 rounded-md cursor-pointer">
+                    Restart
+              </div>
         </div>
     </>
   )

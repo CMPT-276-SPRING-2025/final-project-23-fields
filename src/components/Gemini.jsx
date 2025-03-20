@@ -28,6 +28,7 @@ export const getGeminiResponse = async (message, history = []) => {
     }
 };
 
+
 export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph}) {
     const [history, setHistory] = useState([]);
 
@@ -57,6 +58,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             ...prevHistory,
             { user: userInput, bot: response.slice(5).trim() }
         ]);
+
         setUserInput('');
     };
     
@@ -77,7 +79,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
     }, [setBotResponse, setHistory]);
 
     return (
-        <div>
+        <> {/*
             {!paragraph.text && <p>Bot: {botResponse}</p>}
             <form onSubmit={handleSubmit}>
                 <input
@@ -88,6 +90,37 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 />
                 <button type="submit">Send</button>
             </form>
-        </div>
+            */}
+            <div className="bg-zinc-800 flex items-center justify-center min-h-screen  overflow-hidden">
+                <div className="bg-amber-200 h-200 w-150 flex flex-col justify-center rounded-md">
+                    {/* Chat Output */}
+                    <div className="bg-amber-50 ml-5 h-160 max-h-160 w-140 max-w-140 flex-col overflow-scroll overflow-x-hidden">
+                            {
+                                history.map((message,index) =>(
+                                    <div key={index} className="p-1 max-w-fit mb-2">
+                                      {index !== 0 && <div className="bg-amber-400 rounded-md mb-2">User: {message.user}</div>}
+                                        <div className="bg-amber-100 rounded-md">Bot: {message.bot}</div>
+                                    </div>
+                                ))
+                            }
+                    </div>
+                    {/* Input */}
+                    <div className="bg-green-700 mt-5 mx-5 h-20 rounded-lg grid grid-cols-[450px_1fr]">
+                        <form onSubmit={handleSubmit} className="bg-pink-200 rounded-l-md">
+                            <input className="h-full w-full"
+                                type="text"
+                                placeholder="Ask RoTypeAI"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}>
+                            </input>
+                        </form>
+                        <button
+                        className="bg-amber-50 rounded-r-md flex justify-center items-center cursor-pointer"
+                        onClick={handleSubmit}>Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 }

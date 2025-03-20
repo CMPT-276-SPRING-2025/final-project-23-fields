@@ -64,13 +64,12 @@ function Chatbot() {
     });
     
     return (
-        <div>
-            <h1>This is the chatbot page</h1>
+        <div className="bg-gray-400 h-screen grid grid-cols-[1250px_1fr]">
+            <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
             <Gemini paragraph={paragraph} setParagraph={setParagraph} 
             botResponse={botResponse} setBotResponse={setBotResponse} 
             userInput={userInput} setUserInput={setUserInput} 
             updateParagraph={updateParagraph}/>
-            <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
         </div>
     );
 }
