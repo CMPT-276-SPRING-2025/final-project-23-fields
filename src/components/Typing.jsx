@@ -290,8 +290,31 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         </div>
         */}
         <div className="bg-zinc-800 inline-flex flex-col items-center justify-center">
-              <div className="bg-amber-200 h-100 w-200 flex justify-center items-center rounded-md">
-                  <div>Typing</div>
+              <div className="bg-amber-200 h-100 w-200 flex flex-col justify-center items-center rounded-md">
+                <div id="typingtestcontainer" className="hidden">
+                  <div id="typingtestheader">
+                    <div id="typingtimer" className="text-center">{typingTime / 1000}</div>
+                  </div>
+                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
+                    <div id="words" className="blur-sm group-focus:blur-none"></div>
+                    <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
+                    <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
+                  </div>
+                </div>
+                <div id="resultscontainer" className="hidden text-center">
+                  <h1>Results</h1>
+                  <div>
+                    <span>WPM</span>
+                    <span id="wpm">0</span>
+                  </div>
+                  <div>
+                    <span>ACC</span>
+                    <span id="accuracy">0%</span>
+                  </div>
+                  <div>
+                    <span id="elapsedTime">0 Seconds</span>
+                  </div>
+                </div>
               </div>
               <div className="mt-10 bg-amber-50 px-10 py-3.5 rounded-md cursor-pointer">
                     Restart
