@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Typing from '../components/Typing.jsx';
 import Gemini from '../components/Gemini.jsx';
+import Header from '../components/Header.jsx';
 
 function Chatbot() {    
     // @text (string) generated typing test data
@@ -64,14 +65,16 @@ function Chatbot() {
     });
     
     return (
-        <div>
-            <h1>This is the chatbot page</h1>
-            <Gemini paragraph={paragraph} setParagraph={setParagraph} 
-            botResponse={botResponse} setBotResponse={setBotResponse} 
-            userInput={userInput} setUserInput={setUserInput} 
-            updateParagraph={updateParagraph}/>
-            <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
-        </div>
+       <>
+            <Header notLandingPage={true}/>
+            <div className="bg-gray-400 h-screen grid grid-cols-[1250px_1fr] mt-3">
+                <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
+                <Gemini paragraph={paragraph} setParagraph={setParagraph} 
+                botResponse={botResponse} setBotResponse={setBotResponse} 
+                userInput={userInput} setUserInput={setUserInput} 
+                updateParagraph={updateParagraph}/>
+            </div>
+       </> 
     );
 }
 
