@@ -60,18 +60,18 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
 
   function getResults() {
     console.log(analytics);
+    const totalTime = (new Date()).getTime() - startTime;
     let wpm, accuracy;
     const wpmElement = document.getElementById('wpm');
     const accuracyElement = document.getElementById('accuracy');
     const timerElement = document.getElementById('elapsedTime');
 
-    wpm = Math.round((analytics.correctLetters / 5) / (typingTime / 60000));
-    console.log(Math.round((analytics.correctLetters / 5) / (typingTime / 60)))
+    wpm = Math.round((analytics.correctLetters / 5) / (totalTime / 60000));
     accuracy = Math.round((analytics.correctLetters / analytics.totalLetters) * 100);
 
     wpmElement.innerHTML = `${wpm}`;
     accuracyElement.innerHTML = `${accuracy}%`;
-    timerElement.innerHTML = `${typingTime / 1000} seconds`;
+    timerElement.innerHTML = `${Math.round(totalTime / 1000)} seconds`;
 
     updateResults(wpm, accuracy, analytics.missedLetters, analytics.slowLetters);
   }
