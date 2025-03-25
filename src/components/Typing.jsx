@@ -163,11 +163,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           removeClass(currentLetter, 'current');
         }
         addClass(currentWord.nextSibling.firstChild, 'current');
-      // End of Paragraph
-      } else {
-        endTest();
       }
-      
     // Condition: Backspace key pressed
     } else if(isBackspace) {
       // Condition: Ignore very first word of paragraph
@@ -198,6 +194,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       }
     }
     analytics.averageTime = ((analytics.totalLetters-1) * analytics.averageTime + lapsedTime) / analytics.totalLetters;
+    if (!currentWord.nextSibling && !currentLetter.nextSibling) {
+      endTest();
+    }
 
     // Autoscroll words
     const typingTest = document.getElementById('typingtest');
