@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 
+let keyUp = false;
+let timer = null;
+let startTime = null;
+let lastKeyStroke = null;
+
 export default function Typing({ paragraph, results, updateParagraph, updateResults, typingTime, setTypingTime }) {
   const correctKeyClasses = ['correct', 'text-white'];
   const wrongKeyClasses = ['wrong', 'text-red-500'];
 
   const sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-  //const eventListen = useState[]
-  window.timer = null;
-  window.testStart = null;
-  window.lastKeyStroke = null;
 
   /////////////////////////////// Analytics ///////////////////////////////
   /***********************************************************************/
@@ -35,9 +36,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   }
 
   function clearEffects() {
-    clearInterval(window.timer);
+    clearInterval(timer);
     document.getElementById("typingtimer").innerHTML = "0";
-    window.timer = null;
+    timer = null;
   }
 
   // Initiate test on paragraph update
@@ -47,10 +48,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     document.getElementById("typingtestcontainer").style.display = 'block';
     document.getElementById("resultscontainer").style.display = 'none';
 
-    console.log("eventListener: " + eventListener)
-    if (true) {
+    if (!keyUp) {
       document.getElementById("typingtest").addEventListener('keyup', keyPress);
-      console.log("TRUE eventListener: " + eventListener)
+      keyUp = true;
     }
     setAnalytics(0,0,{},{},0);
 
@@ -82,7 +82,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     document.getElementById("typingtestcontainer").style.display = 'none';
     document.getElementById("resultscontainer").style.display = 'block';
     document.getElementById("typingtest").removeEventListener('keyup', keyPress);
-    eventListener = false;
+    keyUp = false;
   }
 
   const keyPress = (event) => {
@@ -100,24 +100,24 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     const isFirstLetter = currentLetter == currentWord.firstChild;
     const currentTime = (new Date()).getTime();
 
-    if (!window.timer && !isBackspace) {
-      window.gameStart = (new Date()).getTime();
-      window.lastKeyStroke = window.gameStart;
-      window.timer = setInterval(()=> {
-        const deltaTime = Math.round(((new Date()).getTime() - window.gameStart) / 1000);
+    if (!timer && !isBackspace) {
+      startTime = (new Date()).getTime();
+      lastKeyStroke = startTime;
+      timer = setInterval(()=> {
+        const deltaTime = Math.round(((new Date()).getTime() - startTime) / 1000);
         if (!document.getElementById('typingtimer')) {
-          clearInterval(window.timer);
+          clearInterval(timer);
           return;
         }
         document.getElementById('typingtimer').innerHTML = `${deltaTime}`;
-      }, 1000)
+      }, 1000);
     }
     
     // Increment characters typed count
     analytics.totalLetters++;
     
-    const lapsedTime = currentTime - window.lastKeyStroke;
-    window.lastKeyStroke = currentTime;
+    const lapsedTime = currentTime - lastKeyStroke;
+    lastKeyStroke = currentTime;
     
     // Condition: Valid key is pressed
     if (!isBackspace && !isSpace) {
