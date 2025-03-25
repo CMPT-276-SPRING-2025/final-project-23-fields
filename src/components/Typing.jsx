@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Typing({ paragraph, results, updateParagraph, updateResults, typingTime, setTypingTime }) {
   const correctKeyClasses = ['correct', 'text-white'];
   const wrongKeyClasses = ['wrong', 'text-red-500'];
 
   const sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+  //const eventListen = useState[]
   window.timer = null;
   window.testStart = null;
   window.lastKeyStroke = null;
@@ -33,19 +34,28 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     return paragraph.replace(/[^\w\s]/gi, '').toLowerCase();
   }
 
+  function clearEffects() {
+    clearInterval(window.timer);
+    document.getElementById("typingtimer").innerHTML = "0";
+    window.timer = null;
+  }
+
   // Initiate test on paragraph update
   useEffect(() => {
     if (!paragraph.text) return
+    clearEffects();
     document.getElementById("typingtestcontainer").style.display = 'block';
     document.getElementById("resultscontainer").style.display = 'none';
 
-    document.getElementById("typingtest").addEventListener('keyup', keyPress);
-
+    console.log("eventListener: " + eventListener)
+    if (true) {
+      document.getElementById("typingtest").addEventListener('keyup', keyPress);
+      console.log("TRUE eventListener: " + eventListener)
+    }
     setAnalytics(0,0,{},{},0);
 
     console.log(paragraph);
     populateWords(paragraph);
-    window.timer = null;
   }, [paragraph]);
 
   function getResults() {
@@ -67,22 +77,24 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   }
   
   function endTest() {
-    clearInterval(window.timer);
     getResults();
+    clearEffects();
     document.getElementById("typingtestcontainer").style.display = 'none';
     document.getElementById("resultscontainer").style.display = 'block';
-
     document.getElementById("typingtest").removeEventListener('keyup', keyPress);
+    eventListener = false;
   }
 
   const keyPress = (event) => {
     const key = event.key;
     const isSpace = key == ' ';
     const isBackspace = key == 'Backspace';
+    // Return if unexpected key is pressed (not A-Z or space/backspace)
     if (key.length == 1 && !(key >= 'A' && key <= 'Z') && !(key >= 'a' && key <= 'z') && !isSpace) return;
     if (key.length > 1 && !isBackspace) return;
     const currentWord = document.querySelector('.word.current');
     const currentLetter = document.querySelector('.letter.current');
+    // Return if paragraph does not exist
     if (!currentWord) return;
     const expectedKey = currentLetter ? currentLetter.innerHTML : ' ';
     const isFirstLetter = currentLetter == currentWord.firstChild;
@@ -92,17 +104,12 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       window.gameStart = (new Date()).getTime();
       window.lastKeyStroke = window.gameStart;
       window.timer = setInterval(()=> {
-        const deltaTime = ((new Date()).getTime() - window.gameStart);
-        const remainingTime = Math.round((typingTime - deltaTime) / 1000);
+        const deltaTime = Math.round(((new Date()).getTime() - window.gameStart) / 1000);
         if (!document.getElementById('typingtimer')) {
           clearInterval(window.timer);
           return;
         }
-        document.getElementById('typingtimer').innerHTML = `${remainingTime}`;
-
-        if (remainingTime <= 0) {
-          endTest();
-        }
+        document.getElementById('typingtimer').innerHTML = `${deltaTime}`;
       }, 1000)
     }
     
@@ -136,7 +143,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       }
     // Condition: Space key is pressed
     } else if (isSpace) {
-      // Condition: Space key is expected
+      // Condition: Space key is not expected
       if (expectedKey != ' ') {
         const invalidatedLetters = [...document.querySelectorAll('.word.current .letter:not(correct)')];
         invalidatedLetters.forEach(l => {
@@ -144,7 +151,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           analytics.missedLetters[l.innerHTML] = analytics.missedLetters[l.innerHTML] ? analytics.missedLetters[l.innerHTML] + 1 : 1;
           analytics.totalLetters++;
         });
-      } else {
+      // Condition: Space key is expected and next word exists
+      } else if (currentWord.nextSibling) {
         analytics.correctLetters++;
       }
       // Move onto next word
@@ -155,7 +163,10 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
           removeClass(currentLetter, 'current');
         }
         addClass(currentWord.nextSibling.firstChild, 'current');
-      }   
+      // End of Paragraph
+      } else {
+        endTest();
+      }
       
     // Condition: Backspace key pressed
     } else if(isBackspace) {
@@ -293,7 +304,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
               <div className="bg-amber-200 h-100 w-200 flex flex-col justify-center items-center rounded-md">
                 <div id="typingtestcontainer" className="hidden">
                   <div id="typingtestheader">
-                    <div id="typingtimer" className="text-center">{typingTime / 1000}</div>
+                    <div id="typingtimer" className="text-center">0</div>
                   </div>
                   <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
                     <div id="words" className="blur-sm group-focus:blur-none"></div>
