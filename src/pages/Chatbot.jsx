@@ -3,7 +3,13 @@ import Typing from '../components/Typing.jsx';
 import Gemini from '../components/Gemini.jsx';
 import Header from '../components/Header.jsx';
 
-function Chatbot() {    
+function Chatbot() {  
+    // (string) keyword to use for searching wikipedia API  
+    const [searchKeyword, setSearchKeyword] = useState(null);
+
+    // (string) paragraph containing text returned from searched Wikipedia article
+    const [articleText, setArticleText] = useState(null);
+
     // @text (string) generated typing test data
     const [paragraph, setParagraph] = useState({
         text: null
