@@ -299,35 +299,34 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         </div>
         </div>
         */}
-        <div className="bg-zinc-800 inline-flex flex-col items-center justify-center">
-              <div className="bg-amber-200 h-100 w-200 flex flex-col justify-center items-center rounded-md">
+        <div className="flex flex-[2_1_0] flex-col bg-zinc-800 justify-center items-center overflow-auto sm:min-w-[50%] md:min-w-[55%] lg:min-w-0">
+              <div className="bg-gray-700 lg:w-[50vw] h-[40vh] w-full  items-center justify-center flex rounded-md shadow-md">
                 <div id="typingtestcontainer" className="hidden">
                   <div id="typingtestheader">
-                    <div id="typingtimer" className="text-center">0</div>
+                    <div id="typingtimer" className="text-center font-inter text-white">0</div>
                   </div>
-                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
-                    <div id="words" className="blur-sm group-focus:blur-none"></div>
-                    <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
-                    <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
+                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden bg-gray-700 rounded-md focus:bg-gray-700">
+                    <div id="words" className="p-5 text-zinc-400 font-inter blur-sm group-focus:blur-none"></div>
+                    <div id="cursor" className="absolute blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-blue-600"></div>
+                    <div id="focus-error" className="text-white font-inter absolute justify-center flex text-center items-center inset-0 select-none group-focus:hidden">Click here to resume</div>
                   </div>
                 </div>
                 <div id="resultscontainer" className="hidden text-center">
-                  <h1>Results</h1>
-                  <div>
-                    <span>WPM</span>
-                    <span id="wpm">0</span>
+                  <h1 className="font-jost text-blue-600 font-bold text-3xl">Results</h1>
+                  <div className="inline-flex gap-2 m-6">
+                    <div>
+                      <span className="m-2 font-jost text-white text-4xl font-bold">WPM</span>
+                      <span id="wpm" className="font-jost text-white text-4xl font-bold">0</span>
+                    </div>
+                    <div>
+                      <span className="m-2 font-jost text-white text-4xl font-bold">ACC</span>
+                      <span id="accuracy" className="font-jost text-white text-4xl font-bold">0%</span>
+                    </div>
                   </div>
                   <div>
-                    <span>ACC</span>
-                    <span id="accuracy">0%</span>
-                  </div>
-                  <div>
-                    <span id="elapsedTime">0 Seconds</span>
+                    <span id="elapsedTime" className="font-jost text-zinc-600 text-2xl">0 Seconds</span>
                   </div>
                 </div>
-              </div>
-              <div className="mt-10 bg-amber-50 px-10 py-3.5 rounded-md cursor-pointer">
-                    Restart
               </div>
         </div>
     </>
