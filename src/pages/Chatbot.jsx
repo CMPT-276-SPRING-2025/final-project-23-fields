@@ -73,7 +73,7 @@ function Chatbot() {
     return (
        <>
             <Header notLandingPage={true}/>
-            <div className="bg-gray-400 h-screen grid grid-cols-[1250px_1fr] mt-3">
+            <div className="bg-gray-200 flex h-screen justify-center pt-14">
                 <Typing paragraph={paragraph} updateParagraph={updateParagraph} results={results} updateResults={updateResults} typingTime={typingTime} setTypingTime={setTypingTime}/>
                 <Gemini paragraph={paragraph} setParagraph={setParagraph} 
                 botResponse={botResponse} setBotResponse={setBotResponse} 
