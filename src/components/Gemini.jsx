@@ -70,11 +70,11 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 return (
                     <>
                         <div className="flex justify-end">
-                            <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw] bg-amber-400">
-                                <div className="bg-amber-700 mr-[0.5vw] rounded-md">
+                            <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw]">
+                                <div className="bg-neutral-900 mr-[0.5vw] rounded-md p-2 font-inter">
                                     {message}
                                 </div>
-                                <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center bg-fuchsia-500">
+                                <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center bg-neutral-900 text-blue-600 font-bold">
                                     Y
                                 </div>     
                             </div>
@@ -87,11 +87,11 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             return (
                 <>
                     <div className="flex justify-start">
-                        <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw] bg-amber-400">
-                            <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center bg-fuchsia-500">
+                        <div className="flex flex-row p-2 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw] ">
+                            <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center text-blue-600 font-jost font-bold bg-neutral-900">
                                 R
                             </div>
-                            <div className="bg-amber-700 ml-[0.5vw] rounded-md">
+                            <div className="bg-neutral-900 ml-[0.5vw] rounded-md p-2 font-inter">
                                 {message}
                             </div>
                         </div>
@@ -131,11 +131,11 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 <button type="submit">Send</button>
             </form>
             */}
-            <div className="flex flex-[1_1_0] bg-blue-600 w-full h-full overflow-auto justify-center items-center min-w-[50%] md:min-w-[45%] lg:min-w-0">
-                <div className="flex flex-col bg-amber-300 items-center justify-around rounded-md w-[30vw] h-[92vh] min-w-11/12 lg:min-w-3/5">
+            <div className="flex flex-[1_1_0] bg-zinc-800 w-full h-full overflow-auto justify-center items-center min-w-[50%] md:min-w-[45%] lg:min-w-0">
+                <div className="flex flex-col bg-gray-700 shadow-md items-center justify-around rounded-md w-[30vw] h-[92vh] min-w-11/12 lg:min-w-3/5 text-white">
                     {/* Chat Output */}
                     <div className="flex flex-col items-center">
-                        <div className="bg-amber-50 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
+                        <div className="bg-gray-700 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
                                 {
                                     history.map((message,index) =>(
                                         <div key={index}>
@@ -156,8 +156,8 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                         </div>
                     </div>
                     {/* Input */}
-                    <div className="bg-green-700 flex h-[10vh] w-[29vw] rounded-md min-w-19/20 md:min-w-79/80 lg:min-w-0">
-                        <form onSubmit={handleSubmit} className="bg-fuchsia-500 min-w-10/12 rounded-l-md">
+                    <div className="bg-green-500 flex h-[10vh] w-[29vw] rounded-md min-w-19/20 md:min-w-79/80 lg:min-w-0 text-white">
+                        <form onSubmit={handleSubmit} className="bg-neutral-900 min-w-10/12 rounded-l-md">
                             <input className="h-full w-full"
                                 type="text"
                                 placeholder="Ask RoTypeAI"
@@ -166,7 +166,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                             </input>
                         </form>
                         <button
-                        className="bg-amber-50 min-w-2/12 rounded-r-md cursor-pointer"
+                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer"
                         onClick={handleSubmit}>Send
                         </button>
                     </div>

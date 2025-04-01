@@ -299,16 +299,16 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         </div>
         </div>
         */}
-        <div className="flex flex-[2_1_0] flex-col bg-pink-500 justify-center items-center overflow-auto sm:min-w-[50%] md:min-w-[55%] lg:min-w-0">
-              <div className="bg-amber-600 lg:w-[50vw] h-[40vh] w-full  items-center justify-center flex rounded-md">
+        <div className="flex flex-[2_1_0] flex-col bg-zinc-800 justify-center items-center overflow-auto sm:min-w-[50%] md:min-w-[55%] lg:min-w-0">
+              <div className="lg:w-[50vw] h-[40vh] w-full  items-center justify-center flex rounded-md">
                 <div id="typingtestcontainer" className="hidden">
                   <div id="typingtestheader">
-                    <div id="typingtimer" className="text-center">0</div>
+                    <div id="typingtimer" className="text-center font-inter text-white">0</div>
                   </div>
-                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden bg-red-300 focus:bg-blue-300">
+                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden bg-gray-700 rounded-md focus:bg-gray-700">
                     <div id="words" className="blur-sm group-focus:blur-none"></div>
-                    <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
-                    <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
+                    <div id="cursor" className="absolute blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
+                    <div id="focus-error" className="text-white font-inter absolute justify-center flex text-center items-center inset-0 select-none group-focus:hidden">Click here to resume</div>
                   </div>
                 </div>
                 <div id="resultscontainer" className="hidden text-center">

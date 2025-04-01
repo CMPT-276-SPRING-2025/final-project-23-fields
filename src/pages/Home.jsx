@@ -7,7 +7,7 @@ function Home() {
           <Header notLandingPage={false}/>
          <div className="bg-zinc-800 text-center h-screen overflow-hidden">
               <div className="flex flex-col pt-40 bg-zinc-800">
-                    <div className="mb-10 text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[6rem] xl:text-[7rem] text-blue-600 font-jost font-bold">RoTypeAi</div>
+                    <div className="mb-10 text-[3rem] sm:text-[4rem] md:text-[6rem] lg:text-[6rem] xl:text-[7rem] text-blue-600 font-jost font-bold">RoTypeAI</div>
                     <div className="text-[1rem] sm:text-[1.5rem] md:text-[2rem] lg:text-[2rem] xl:text-[2.5rem] text-white font-jost font-medium">Create Personalized Typing Tests</div>
               </div>
               <div className="flex flex-col flex-wrap items-center">
