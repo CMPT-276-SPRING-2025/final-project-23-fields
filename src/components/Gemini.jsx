@@ -158,7 +158,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                     {/* Input */}
                     <div className="bg-green-500 flex h-[10vh] w-[29vw] rounded-md min-w-19/20 md:min-w-79/80 lg:min-w-0 text-white">
                         <form onSubmit={handleSubmit} className="bg-neutral-900 min-w-10/12 rounded-l-md">
-                            <input className="h-full w-full"
+                            <input className="h-full w-full p-2"
                                 type="text"
                                 placeholder="Ask RoTypeAI"
                                 value={userInput}
