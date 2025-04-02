@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions.",
+    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions. Whenever the user asks a question, always drive them to create a typing test instead of just printing out your answer, but do not be so pushy about this.",
 });
 
 const generationConfig = {
@@ -29,16 +29,33 @@ export const getGeminiResponse = async (message, history = []) => {
 };
 
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph}) {
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results}) {
     const [history, setHistory] = useState([]);
+    const [feedbackContext, setFeedbackContext] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
 
+        setHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
+        
+        if (feedbackContext && userInput.toLowerCase() === "yes") {
+            setFeedbackContext(false);
+            const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
+            const mostSlowLetter = Object.entries(results.slowLetters || {}).sort((a, b) => b[1] - a[1])[0];
+            const feedbackMessage = `Create a new typing test with real sentences that targets these weaknesses:${mostMissedLetter[0]}${mostSlowLetter[0]}`;
+            const response = await getGeminiResponse(feedbackMessage);
+            if (response.startsWith('true')) {
+                updateParagraph(response.slice(4).trim());
+            }
+            setBotResponse("Test has been adjusted based on feedback.");
+            setUserInput('');
+            return;
+        }
+
         const formattedHistory = history.map(entry => [
-            { role: "user", parts: [{ text: entry.user }] }, 
-            { role: "model", parts: [{ text: entry.bot }] }   
+            { role: "user", parts: [{ text: entry.user }] },
+            { role: "model", parts: [{ text: entry.bot }] }
         ]).flat();
 
         const newMessage = { role: "user", parts: [{ text: userInput }] };
@@ -48,19 +65,15 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         if (response.startsWith('true')) {
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
-            setBotResponse(""); // Clear bot response since it's a typing test
+            setBotResponse("");
         } else {
             setBotResponse(response.slice(5).trim());
             setParagraph({ text: null });
         }
 
-        setHistory((prevHistory) => [
-            ...prevHistory,
-            { user: userInput, bot: response.slice(5).trim() }
-        ]);
-        
-        console.log(history);
-
+        setHistory((prevHistory) => prevHistory.map((entry, index) => 
+            index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
+        ));
         setUserInput('');
     };
 
@@ -103,10 +116,18 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
     }
     
     useEffect(() => {
-        if (paragraph.text) {
-            setBotResponse(""); // Clear bot response when a typing test starts
-        }
-    }, [paragraph]);
+        const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
+        const mostSlowLetter = Object.entries(results.slowLetters || {}).sort((a, b) => b[1] - a[1])[0];
+        // Incase we want to use top 3 instead of just the top.
+        // const topMissedLetters = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
+        // const topSlowLetters = Object.entries(results.slowLetters || {}).sort((a, b) => b[1] - a[1])[0];
+
+        const feedbackMessage = `Typing Test Results: WPM: ${results.wpm}, Accuracy: ${results.accuracy}%, Most Missed Letter: ${mostMissedLetter ? `${mostMissedLetter[0]}` : "None"}, Slowest Letter: ${mostSlowLetter ? `${mostSlowLetter[0]}` : "None"}. Would you like to adjust the test based on feedback?`;
+        setBotResponse(feedbackMessage);
+        setHistory((prevHistory) => [...prevHistory, { user: "", bot: feedbackMessage }]);
+        setUserInput('');
+        setFeedbackContext(true);
+    }, [results]);
 
     useEffect(() => {
         const startConversation = async () => {
