@@ -76,6 +76,44 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         ));
         setUserInput('');
     };
+
+    const rowOutput = (message, index, sender) => {
+        if (sender === 'user') {
+            if (index != 0) {
+                return (
+                    <>
+                        <div className="flex justify-end">
+                            <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw]">
+                                <div className="bg-neutral-900 mr-[0.5vw] rounded-md p-2 font-inter">
+                                    {message}
+                                </div>
+                                <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center bg-neutral-900 text-blue-600 font-bold">
+                                    Y
+                                </div>     
+                            </div>
+                        </div>
+                    </>
+                )
+            }
+        }
+        else {
+            return (
+                <>
+                    <div className="flex justify-start">
+                        <div className="flex flex-row p-2 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] ml-[0.5vw] ">
+                            <div className="min-w-[1.5rem] max-h-[1.5rem] rounded-[50%] text-center text-blue-600 font-jost font-bold bg-neutral-900">
+                                R
+                            </div>
+                            <div className="bg-neutral-900 ml-[0.5vw] rounded-md p-2 font-inter">
+                                {message}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )
+        }     
+     
+    }
     
     useEffect(() => {
         const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
@@ -114,23 +152,34 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 <button type="submit">Send</button>
             </form>
             */}
-            <div className="bg-zinc-800 flex items-center justify-center min-h-screen  overflow-hidden">
-                <div className="bg-amber-200 h-200 w-150 flex flex-col justify-center rounded-md">
+            <div className="flex flex-[1_1_0] bg-zinc-800 w-full h-full overflow-auto justify-center items-center min-w-[50%] md:min-w-[45%] lg:min-w-0">
+                <div className="flex flex-col bg-gray-700 shadow-md items-center justify-around rounded-md w-[30vw] h-[92vh] min-w-11/12 lg:min-w-3/5 text-white">
                     {/* Chat Output */}
-                    <div className="bg-amber-50 ml-5 h-160 max-h-160 w-140 max-w-140 flex-col overflow-scroll overflow-x-hidden">
-                            {
-                                history.map((message,index) =>(
-                                    <div key={index} className="p-1 max-w-fit mb-2">
-                                      {index !== 0 && <div className="bg-amber-400 rounded-md mb-2">User: {message.user}</div>}
-                                        <div className="bg-amber-100 rounded-md">Bot: {message.bot}</div>
-                                    </div>
-                                ))
-                            }
+                    <div className="flex flex-col items-center">
+                        <div className="bg-gray-700 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
+                                {
+                                    history.map((message,index) =>(
+                                        <div key={index}>
+                                            {/* User Response*/}
+                                            {rowOutput(message.user, index, 'user')}
+                                            {/* Bot Response  */}
+                                            {rowOutput(message.bot, index, 'bot')}
+                                        </div>
+                                        //<div key={index} className={`flex ${message.user ? 'justify-end' : 'justify-start'}`}>
+                                          //  <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] bg-amber-400">
+                                            //    {index !== 0 && <div className="bg-amber-400 rounded-md mb-2">User: {message.user}</div>}
+                                              //  <div className="bg-amber-100 rounded-md">Bot: {message.bot}</div>
+                                           // </div>
+                                       // </div> 
+                                    ))
+                                }
+                                <div className="mb-1"></div>
+                        </div>
                     </div>
                     {/* Input */}
-                    <div className="bg-green-700 mt-5 mx-5 h-20 rounded-lg grid grid-cols-[450px_1fr]">
-                        <form onSubmit={handleSubmit} className="bg-pink-200 rounded-l-md">
-                            <input className="h-full w-full"
+                    <div className="bg-green-500 flex h-[10vh] w-[29vw] rounded-md min-w-19/20 md:min-w-79/80 lg:min-w-0 text-white">
+                        <form onSubmit={handleSubmit} className="bg-neutral-900 min-w-10/12 rounded-l-md">
+                            <input className="h-full w-full p-2"
                                 type="text"
                                 placeholder="Ask RoTypeAI"
                                 value={userInput}
@@ -138,7 +187,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                             </input>
                         </form>
                         <button
-                        className="bg-amber-50 rounded-r-md flex justify-center items-center cursor-pointer"
+                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer"
                         onClick={handleSubmit}>Send
                         </button>
                     </div>
