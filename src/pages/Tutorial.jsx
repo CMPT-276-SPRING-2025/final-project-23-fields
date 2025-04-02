@@ -10,27 +10,27 @@ function Tutorial() {
 
     const Images = [
         {
-            url: "https://placehold.co/1300x650",
+            url: "./src/assets/images/tut1.png",
             alt: "Image1"
         },
         {
-            url: "https://placehold.co/1250x650",
+            url: "./src/assets/images/tut2.png",
             alt: "Image2"
         },
         {
-            url: "https://placehold.co/1200x650",
+            url: "./src/assets/images/tut3.png",
             alt: "Image3"
         },
         {
-            url: "https://placehold.co/1150x650",
+            url: "./src/assets/images/tut4.png",
             alt: "Image4"
         },
         {
-            url: "https://placehold.co/1100x650",
+            url: "./src/assets/images/tut5.png",
             alt: "Image5"
         },
         {
-            url: "https://placehold.co/1100x600",
+            url: "./src/assets/images/tut6.png",
             alt: "Image6"
         },
     ];
@@ -71,24 +71,20 @@ function Tutorial() {
         <>
                 <Header notLandingPage={true}/>
                 <section>
-                    <div className="pt-20 flex flex-col bg-gray-700 items-center justify-center h-screen">
+                    <div className="pt-20 flex flex-col bg-zinc-800 items-center justify-center h-screen">
                         <Progress Prog={Prog} progCheck={progCheck}/>
-                        <div className="border-2">
+                        <div>
                             <img className="w-337.5 h-162.5 object-contain"src={Images[image].url} alt={Images[image].alt}></img>
                         </div >
-                        <div className="mt-10 grid grid-cols-[200px_200px] grid-rows-[75px] bg-amber-900 gap-x-14">
+                        <div className="mt-10 grid grid-cols-[200px_200px] grid-rows-[75px] gap-x-14">
                             <button className="cursor-pointer" onClick={imageLast}>
-                                <div className="bg-pink-300 flex items-center justify-center h-full">
-                                    <div className="text-3xl">
+                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl ">
                                     Back
-                                    </div>
                                 </div>
                             </button>
                             <button className="cursor-pointer" onClick={imageNext}>
-                                <div className="bg-blue-300 flex items-center justify-center h-full">
-                                    <div className="text-3xl">
+                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
                                     Next
-                                    </div>
                                 </div>
                             </button>
                         </div>

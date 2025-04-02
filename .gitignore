@@ -1,3 +1,6 @@
+# Remove docs
+docs/ai-disclosures/
+
 # Mac
 .DS_Store
 
