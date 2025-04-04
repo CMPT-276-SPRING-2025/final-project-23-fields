@@ -305,7 +305,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
                   <div id="typingtestheader">
                     <div id="typingtimer" className="text-center font-inter text-white">0</div>
                   </div>
-                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden bg-gray-700 rounded-md focus:bg-gray-700">
+                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden rounded-md">
                     <div id="words" className="p-5 text-zinc-400 font-inter blur-sm group-focus:blur-none"></div>
                     <div id="cursor" className="absolute blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-blue-600"></div>
                     <div id="focus-error" className="text-white font-inter absolute justify-center flex text-center items-center inset-0 select-none group-focus:hidden">Click here to resume</div>
