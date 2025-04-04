@@ -187,8 +187,9 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                             </input>
                         </form>
                         <button
-                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer"
-                        onClick={handleSubmit}>Send
+                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer flex items-center justify-center"
+                        onClick={handleSubmit}>
+                            <img src="images/send.png" alt="Send" className="h-6 w-6"></img>
                         </button>
                     </div>
                 </div>
