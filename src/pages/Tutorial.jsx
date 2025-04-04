@@ -10,27 +10,27 @@ function Tutorial() {
 
     const Images = [
         {
-            url: "./public/images/tut1.png",
+            url: "/images/tut1.png",
             alt: "Image1"
         },
         {
-            url: "./public/images/tut2.png",
+            url: "/images/tut2.png",
             alt: "Image2"
         },
         {
-            url: "./public/images/tut3.png",
+            url: "/images/tut3.png",
             alt: "Image3"
         },
         {
-            url: "./public/images/tut4.png",
+            url: "/images/tut4.png",
             alt: "Image4"
         },
         {
-            url: "./public/images/tut5.png",
+            url: "/images/tut5.png",
             alt: "Image5"
         },
         {
-            url: "./public/images/tut6.png",
+            url: "/images/tut6.png",
             alt: "Image6"
         },
     ];
