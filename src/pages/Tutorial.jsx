@@ -47,7 +47,7 @@ function Tutorial() {
     const imageLast = () => {
         // If its the first image, goes to Home, else moves to previous
         if (image === 0) {
-            navigate('/');
+            navigate('/Home');
         }
         else {
             setImage(image - 1);
