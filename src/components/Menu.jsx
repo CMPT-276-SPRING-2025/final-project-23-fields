@@ -24,7 +24,7 @@ function Menu() {
             </ul>
         </>}
         <button className="mr-15 cursor-pointer" onClick={Expand}>
-            <img src={"./src/assets/icons/menu.svg"} alt="menu icon" className="mt-px"></img>
+            <img src={"./public/icons/menu.svg"} alt="menu icon" className="mt-px"></img>
         </button>
         </>
     );
