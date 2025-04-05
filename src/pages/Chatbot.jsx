@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from 'react';
 import Typing from '../components/Typing.jsx';
 import Gemini from '../components/Gemini.jsx';
 import Header from '../components/Header.jsx';
+import Mediawiki from '../components/mediawiki.jsx';
 
 function Chatbot() {  
-    // (string) keyword to use for searching wikipedia API  
-    const [searchKeyword, setSearchKeyword] = useState(null);
+    // (string) keyword to use for searching wikipedia API, request for message amount 
+    const [searchKeyword, setSearchKeyword] = useState({request: "", keyword: ""});
 
-    // (string) paragraph containing text returned from searched Wikipedia article
-    const [articleText, setArticleText] = useState(null);
+    // (string) extract containing text returned from searched Wikipedia article, missing for error confirmation
+    const [articleText, setArticleText] = useState({missing: true, extract: ""});
 
     // @text (string) generated typing test data
     const [paragraph, setParagraph] = useState({
@@ -79,6 +80,7 @@ function Chatbot() {
                 botResponse={botResponse} setBotResponse={setBotResponse} 
                 userInput={userInput} setUserInput={setUserInput} 
                 updateParagraph={updateParagraph} results={results}/>
+                <Mediawiki searchKeyword={searchKeyword} setSearchKeyword={setSearchKeyword} articleText={articleText} setArticleText={setArticleText}/>
             </div>
        </> 
     );

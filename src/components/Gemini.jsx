@@ -30,7 +30,7 @@ export const getGeminiResponse = async (message, history = []) => {
 };
 
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results}) {
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results, searchKeyword, setSearchKeyword, articleText, setArticleText}) {
     const [history, setHistory] = useState([]);
     const hasFetchedResults = useRef(false);
 
