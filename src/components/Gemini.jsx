@@ -135,7 +135,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 <div className="flex flex-col bg-gray-700 shadow-md items-center justify-around rounded-md w-[30vw] h-[92vh] min-w-11/12 lg:min-w-3/5 text-white">
                     {/* Chat Output */}
                     <div className="flex flex-col items-center">
-                        <div className="bg-gray-700 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
+                        <div id="message" className="bg-gray-700 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
                                 {
                                     history.map((message,index) =>(
                                         <div key={index}>
@@ -165,7 +165,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                                 onChange={(e) => setUserInput(e.target.value)}>
                             </input>
                         </form>
-                        <button
+                        <button id="send"
                         className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer"
                         onClick={handleSubmit}>Send
                         </button>

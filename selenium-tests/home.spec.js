@@ -7,6 +7,7 @@ import assert from 'assert';
     try {
         driver = await new Builder().forBrowser('chrome').build();
 
+        console.log("BLACK BOX TESTING")
         // Test Home Page
         await driver.get('http://localhost:5173');
         let homeTitle = await driver.getTitle();
@@ -98,16 +99,18 @@ import assert from 'assert';
         let inputField = await driver.findElement(By.css('input[placeholder="Ask RoTypeAI"]'));
         await driver.sleep(5000);
         await inputField.sendKeys("Create a test about the Inca Empire");
-        let sendButton = await driver.findElement(By.css('button'));
+        let sendButton = await driver.findElement(By.id('send'));
         await sendButton.click();
         console.log('Sent a message to the chatbot');
 
-        // Wait for a response
-        await driver.wait(until.elementLocated(By.css('.bg-neutral-900')), 5000);
-        let botResponse = await driver.findElement(By.css('.bg-neutral-900')).getText();
+        // Wait for and capture the bot's response
+        await driver.sleep(5000); // Wait for API response
+        let messages = await driver.findElements(By.css('#message .bg-neutral-900'));
+        let lastMessage = messages[messages.length - 1];
+        let botResponse = await lastMessage.getText();
         console.log('Bot response:', botResponse);
         assert.ok(botResponse.length > 0, "Bot did not respond");
-        await driver.sleep(5000);
+        console.log("ALL TESTS PASS")
 
     } catch (error) {
         console.error('Error during tests:', error);
