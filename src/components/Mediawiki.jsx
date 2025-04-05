@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 
-export default function Mediawiki({searchKeyword, setSearchKeyword, articleText, setArticleText}) {
+export default function Mediawiki({searchKeyword, setArticleText}) {
+    
     // (String) url containing the needed parameters dependent on request
     const [url, setUrl] = useState('Waiting on Search...');
 
-    // Base parameters
+    // Base parameters for url
     const params = {
         action: "query",
         format: "json",
@@ -35,10 +36,36 @@ export default function Mediawiki({searchKeyword, setSearchKeyword, articleText,
         setUrl(newLink);
     }
 
+    // Uses newly created url to fetch the article text, filtering it, and change useState articleText
     const getArticle = async () => {
         try {
+            // fetch text
+            const response = await fetch(url);
+            const data = await response.json();
 
+            // if text exists
+            if (data.query.pages[0].extract !== undefined) {
+                const article = data.query.pages[0].extract;
+                // If request is a search, filter the text
+                if (searchKeyword.request === "search") {
+                    const filteredText = article.match(/(?:.*?(==)+){6}.*?((==)+)/s);
+                    // If filteredText is true (article must have 3 or more sections) change useState else use normal pre-filter text.
+                    if (filteredText) {
+                        setArticleText({missing: false, extract: filteredText[0]});
+                    } else {
+                        setArticleText({missing: false, extract: article});
+                    }
+                // if request is a description, change useState
+                } else if (searchKeyword.request === "description") {
+                    setArticleText({missing: false, extract: article});
+                }
+            // if text does not exist, throw error for user
+            } else if (data.query.pages[0].missing) {
+                throw new Error(`Wiki Page for ${searchKeyword.keyword} does not exist!`);
+            }
         } catch (error) {
+            // change useState extract to error message to give to the bot
+            setArticleText({missing: true, extract: error.message});
             console.error("Error fetching Wiki page: ", error);
         }
     }
@@ -62,7 +89,5 @@ export default function Mediawiki({searchKeyword, setSearchKeyword, articleText,
             getArticle(url);
         }
     }, [url])
-
-
 
 }
