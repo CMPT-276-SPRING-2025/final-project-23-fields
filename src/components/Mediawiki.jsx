@@ -80,7 +80,7 @@ export default function Mediawiki({searchKeyword, setArticleText}) {
             setParam(params);
             addUrlParams();
         }
-    }, [keyword])
+    }, [searchKeyword])
 
     // Once url is changed to new url it calls this useEffect to start fetch with getArticle(). 
     useEffect(() => {
