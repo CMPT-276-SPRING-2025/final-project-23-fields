@@ -83,7 +83,7 @@ function Tutorial() {
                                 </div>
                             </button>
                             <button className="cursor-pointer" onClick={imageNext}>
-                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
+                                <div id="next" className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
                                     Next
                                 </div>
                             </button>
