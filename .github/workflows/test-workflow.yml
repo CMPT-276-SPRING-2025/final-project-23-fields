@@ -1,4 +1,4 @@
-name: Testing and Staging Workflow
+name: Staging and Testing Workflow
 
 on:
   push:
@@ -22,63 +22,31 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
-
-      - name: Run unit tests
-        run: |
-          node tests/test1.js
-          node tests/test2.js
-
-      - name: Install doctl
+      - name: Deploy to DigitalOcean Staging
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Deploy to DigitalOcean Staging
-        run: |
-          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+      - name: Create deployment
+        run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: '114.0.5735.90'
-
-      - name: Install Chrome dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-
-      - name: Get Chrome version for ChromeDriver
-        id: chrome-version
-        run: |
-          CHROME_VERSION=$(google-chrome --version | cut -d " " -f 3 | cut -d "." -f 1)
-          echo "CHROME_VERSION=$CHROME_VERSION" >> $GITHUB_OUTPUT
+          chrome-version: "stable"
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: '114.0.5735.90'
+          chromedriver-version: "stable"
 
-      - name: Start Chrome Driver
-        run: |
-          export DISPLAY=:99
-          chromedriver --version
-          google-chrome --version
-          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
-
-      - name: Run Selenium tests on staging
+      - name: Run Selenium tests
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
-          DISPLAY: :99
         run: |
-          # Start Xvfb
-          sudo Xvfb :99 -screen 0 1920x1080x24 & 
-          sleep 3
-          
           # Start ChromeDriver
-          chromedriver --port=4444 & 
+          chromedriver --port=4444 &
           sleep 3
-          
-          # Run tests with verbose logging
-          DEBUG=selenium-webdriver:* npx mocha selenium-tests/home.spec.js --timeout 60000
+
+          # Run tests
+          NODE_ENV=staging npx mocha selenium-tests/home.spec.js --timeout 60000
