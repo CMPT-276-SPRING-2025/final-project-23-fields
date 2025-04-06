@@ -8,35 +8,24 @@ import assert from 'assert';
     try {
         // Setup Chrome in headless mode for CI
         const options = new Options();
-        options.addArguments('--headless');  // Changed from '--headless=new'
+        options.addArguments('--headless');
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
         options.addArguments('--disable-gpu');
         options.addArguments('--window-size=1920,1080');
-        options.addArguments('--remote-debugging-port=9222');
-        options.addArguments('--disable-setuid-sandbox');
 
-        // Create driver with explicit server
+        // Create driver
         driver = await new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options)
-            .usingServer('http://localhost:4444')
             .build();
 
-        // Use staging URL if available, otherwise use localhost
-        const baseUrl = process.env.NODE_ENV === 'staging' 
-            ? process.env.STAGING_URL 
-            : 'http://localhost:5173';
-
-        if (!baseUrl) {
-            throw new Error('No URL provided. Set STAGING_URL for staging or run dev server for local testing.');
-        }
-
-        console.log("Testing URL:", baseUrl);
-        console.log("BLACK BOX TESTING");
+        // Navigate to site
+        const baseUrl = process.env.STAGING_URL || 'http://localhost:5173';
+        await driver.get(baseUrl);
+        console.log('Navigating to:', baseUrl);
 
         // Test Home Page
-        await driver.get(baseUrl);
         let homeTitle = await driver.getTitle();
         console.log('Home Page title is:', homeTitle);
         assert.equal(homeTitle, "RoTypeAI");
