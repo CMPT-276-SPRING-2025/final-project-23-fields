@@ -1,5 +1,5 @@
 const errorCode = {
-    1: {missing: true, extract: "Improper search query. This is likely a formatting error caused by Gemini"},
+    1: {missing: true, extract: "Improper search query. This is likely a formatting error resulting from Gemini!"},
     2: {missing: true, extract: "Wiki Page does not exist!"}
 }
 
@@ -35,19 +35,22 @@ const getArticle = async (request, keyword, searchUrl) => {
 
         // if request is of search type
         if (request === "search") {
-            if (data.query.search[0].title !== undefined) {
+            if (data.query.search[0] !== undefined) {
                 const article = data.query.search[0].title;
                 return {missing: false, extract: article};
             } else {
                 throw new Error(`Search query ${keyword} did not turn up any results!`)
             }
-        // if request is of page fetch type
+        // if request is of page/description fetch type
         } else {
             // if text exists
             if (data.query.pages[0].extract !== undefined) {
                 const article = data.query.pages[0].extract;
+                let filteredText = article;
                 // filter the text
-                const filteredText = article.replace(/[=]/g, "");
+                if (article.match(/(?:.*?(==)+){6}.*?((==)+)/s))
+                    filteredText = article.match(/(?:.*?(==)+){6}.*?((==)+)/s).join(" ");
+                filteredText = filteredText.replace(/[=]/g, "");
                 return {missing: false, extract: filteredText};
             // if text does not exist, throw error for user
             } else {
@@ -57,7 +60,7 @@ const getArticle = async (request, keyword, searchUrl) => {
     } catch (error) {
         // change useState extract to error message to give to the bot
         console.error("Error fetching Wiki page: ", error);
-        return {missing: true, extract: error}
+        return {missing: true, extract: error.message}
     }
 }
 

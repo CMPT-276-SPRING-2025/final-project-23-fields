@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { callWikipediaAPI } from './Mediawiki.jsx'
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);

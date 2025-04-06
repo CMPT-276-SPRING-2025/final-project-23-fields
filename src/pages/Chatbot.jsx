@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import Typing from '../components/Typing.jsx';
 import Gemini from '../components/Gemini.jsx';
 import Header from '../components/Header.jsx';
-import Mediawiki from '../components/mediawiki.jsx';
 
 function Chatbot() {  
     // @text (string) generated typing test data
