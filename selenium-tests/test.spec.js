@@ -69,47 +69,63 @@ describe('RoTypeAI Website Tests', function() {
     });
 
     it('should test chatbot functionality', async function() {
-        // Navigate directly to Chatbot
+        // Navigate directly to Chatbot with longer wait
         await driver.get(`${baseUrl}/Chatbot`);
-        await driver.wait(until.urlContains('/Chatbot'), 10000);
-        await driver.sleep(2000);
+        await driver.wait(until.urlContains('/Chatbot'), 15000);
+        await driver.sleep(3000);  // Increased sleep time
 
-        // Wait for chat interface to load and be visible
-        const chatInterface = await driver.wait(
-            until.elementLocated(By.css('.bg-gray-700.shadow-md')),
-            10000
-        );
-        await driver.executeScript("arguments[0].scrollIntoView(true);", chatInterface);
+        try {
+            // Wait for the outer container first
+            const container = await driver.wait(
+                until.elementLocated(By.css('.bg-zinc-800')), 
+                15000
+            );
 
-        // Find input field using more specific selector
-        const inputField = await driver.wait(
-            until.elementLocated(By.css('form.bg-neutral-900 input[type="text"]')),
-            10000
-        );
-        await driver.executeScript("arguments[0].scrollIntoView(true);", inputField);
-        await inputField.clear();
-        await inputField.sendKeys('Create a test about the Inca Empire');
-        
-        // Find send button using more specific selector
-        const sendButton = await driver.wait(
-            until.elementLocated(By.css('button#send.bg-neutral-900')),
-            10000
-        );
-        await sendButton.click();
-        
-        // Wait longer for API response
-        await driver.sleep(7000);
-        
-        // Check for messages using correct selectors from Gemini component
-        const messages = await driver.wait(
-            until.elementsLocated(By.css('#message .bg-neutral-900.mr-\\[0\\.5vw\\]')),
-            15000
-        );
-        assert.ok(messages.length > 0, 'No messages found');
-        
-        const lastMessage = messages[messages.length - 1];
-        const botResponse = await lastMessage.getText();
-        assert.ok(botResponse.length > 0, 'Bot did not respond');
+            // Then wait for the chat interface
+            const chatInterface = await driver.wait(
+                until.elementLocated(By.css('.bg-gray-700.shadow-md.items-center.justify-around.rounded-md')),
+                15000
+            );
+            await driver.executeScript("arguments[0].scrollIntoView(true);", chatInterface);
+            await driver.sleep(2000);  // Wait for scroll
+
+            // Find input field with the exact structure from Gemini.jsx
+            const inputField = await driver.wait(
+                until.elementLocated(By.css('.bg-neutral-900.min-w-10\\/12 input[type="text"]')),
+                15000
+            );
+            await driver.executeScript("arguments[0].scrollIntoView(true);", inputField);
+            await inputField.clear();
+            await inputField.sendKeys('Create a test about the Inca Empire');
+            
+            // Find send button with exact ID and class
+            const sendButton = await driver.wait(
+                until.elementLocated(By.id('send')),
+                15000
+            );
+            await sendButton.click();
+            
+            // Wait longer for API response and initial message
+            await driver.sleep(10000);
+            
+            // Check for messages using exact class structure from Gemini.jsx
+            const messages = await driver.wait(
+                until.elementsLocated(By.css('#message .bg-neutral-900.mr-\\[0\\.5vw\\].rounded-md.p-2.font-inter')),
+                20000
+            );
+            assert.ok(messages.length > 0, 'No messages found');
+            
+            const lastMessage = messages[messages.length - 1];
+            const botResponse = await lastMessage.getText();
+            assert.ok(botResponse.length > 0, 'Bot did not respond');
+
+        } catch (error) {
+            console.error('Error in chatbot test:', error);
+            // Take screenshot for debugging
+            const screenshot = await driver.takeScreenshot();
+            require('fs').writeFileSync('error-screenshot.png', screenshot, 'base64');
+            throw error;
+        }
     });
 
     after(async function() {
