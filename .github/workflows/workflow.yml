@@ -34,34 +34,51 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Create deployment
-        run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+      - name: Create deployment and wait
+        run: |
+          echo "Creating deployment..."
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+
+          # Wait for app to be running
+          echo "Waiting for app to be running..."
+          for i in {1..12}; do
+            APP_STATUS=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format Status --no-header | tr -d '[:space:]')
+            echo "Current status: $APP_STATUS"
+            
+            if [ "$APP_STATUS" = "running" ]; then
+              echo "App is running!"
+              break
+            fi
+            
+            if [ $i -eq 12 ]; then
+              echo "Timeout waiting for app to run"
+              exit 1
+            fi
+            
+            echo "Waiting... ($i/12)"
+            sleep 10
+          done
 
       - name: Wait for deployment and verify
         id: get-url
         run: |
-          # Get app URL directly from doctl
-          STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header)
-
-          # Clean and verify URL
-          STAGING_URL=$(echo $STAGING_URL | tr -d '[:space:]')
+          # Get app URL with verification
+          for i in {1..5}; do
+            STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header | tr -d '[:space:]')
+            
+            if [ ! -z "$STAGING_URL" ]; then
+              echo "Got URL: $STAGING_URL"
+              echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
+              echo "url=$STAGING_URL" >> $GITHUB_OUTPUT
+              break
+            fi
+            
+            echo "Retrying URL fetch... ($i/5)"
+            sleep 5
+          done
 
           if [ -z "$STAGING_URL" ]; then
             echo "Error: Could not get app URL"
-            doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL,DefaultIngress --no-header
-            exit 1
-          fi
-
-          echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
-          echo "url=$STAGING_URL" >> $GITHUB_OUTPUT
-
-          echo "Got staging URL: $STAGING_URL"
-
-      - name: Verify app status
-        run: |
-          APP_STATUS=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format Status --no-header)
-          if [ "$APP_STATUS" != "running" ]; then
-            echo "Error: App is not running (status: $APP_STATUS)"
             exit 1
           fi
 
