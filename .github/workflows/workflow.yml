@@ -40,20 +40,11 @@ jobs:
           echo "Creating deployment..."
           doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-          # Construct the URL directly from app ID
-          STAGING_URL="https://${APP_ID}.ondigitalocean.app"
-          echo "Using URL: $STAGING_URL"
-
-          # Verify the app is responding
-          for i in {1..12}; do
-            if curl -s "$STAGING_URL" > /dev/null; then
-              echo "App is responding at $STAGING_URL"
-              echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
-              break
-            fi
-            echo "Waiting for app to respond... ($i/12)"
-            sleep 10
-          done
+          # Get the actual app URL from doctl
+          APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header)
+          STAGING_URL="https://${APP_URL}"
+          echo "Got URL: ${STAGING_URL}"
+          echo "STAGING_URL=${STAGING_URL}" >> $GITHUB_ENV
 
       - name: Install Chrome
         run: |
