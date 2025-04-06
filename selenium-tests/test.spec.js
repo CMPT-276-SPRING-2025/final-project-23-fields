@@ -13,33 +13,60 @@ describe('RoTypeAI Website Tests', function() {
         options.addArguments('--headless');
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
-        options.addArguments('--disable-gpu');
         options.addArguments('--window-size=1920,1080');
-        options.addArguments('--remote-debugging-port=9222');
 
-        driver = await new Builder()
-            .forBrowser('chrome')
-            .setChromeOptions(options)
-            .build();
+        // Try to connect to ChromeDriver with retries
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                driver = await new Builder()
+                    .forBrowser('chrome')
+                    .setChromeOptions(options)
+                    .build();
+                break;
+            } catch (error) {
+                retries--;
+                if (retries === 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                console.log('Retrying ChromeDriver connection...');
+            }
+        }
 
         // Set implicit wait time
-        await driver.manage().setTimeouts({ implicit: 10000 });
+        await driver.manage().setTimeouts({ 
+            implicit: 10000,
+            pageLoad: 30000,
+            script: 30000 
+        });
     });
 
     it('should load home page and verify elements', async function() {
         const baseUrl = process.env.STAGING_URL || 'http://localhost:5173';
-        await driver.get(baseUrl);
-        console.log('Navigating to:', baseUrl);
+        console.log('Testing URL:', baseUrl);
+
+        // Retry logic for connection issues
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                await driver.get(baseUrl);
+                break;
+            } catch (error) {
+                retries--;
+                if (retries === 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        }
 
         const homeTitle = await driver.getTitle();
-        console.log('Home Page title is:', homeTitle);
+        console.log('Home Page title:', homeTitle);
         assert.equal(homeTitle, "RoTypeAI");
 
-        const howToUseButton = await driver.findElement(By.id("howtouse"));
-        assert.ok(howToUseButton, "How to Use button is missing");
-
-        const jumpInButton = await driver.findElement(By.id("jumpin"));
-        assert.ok(jumpInButton, "Jump In button is missing");
+        // Wait for elements to be present
+        const howToUseButton = await driver.wait(until.elementLocated(By.id("howtouse")), 10000);
+        const jumpInButton = await driver.wait(until.elementLocated(By.id("jumpin")), 10000);
+        
+        assert.ok(await howToUseButton.isDisplayed(), "How to Use button is not visible");
+        assert.ok(await jumpInButton.isDisplayed(), "Jump In button is not visible");
     });
 
     it('should navigate through tutorial', async function() {
