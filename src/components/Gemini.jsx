@@ -33,6 +33,7 @@ export const getGeminiResponse = async (message, history = []) => {
 
 export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results, searchKeyword, setSearchKeyword, articleText, setArticleText}) {
     const [history, setHistory] = useState([]);
+    const [chatHistory, setChatHistory] = useState([]);
     const hasFetchedResults = useRef(false);
 
 
@@ -52,6 +53,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 const response = await getGeminiResponse(feedbackMessage);
                 setBotResponse(response);
                 setHistory(prevHistory => [...prevHistory, { user: "", bot: response }]);
+                setChatHistory(prevHistory => [...prevHistory, { user: null, bot: response }]);
             })();
         }
     }, [results]);
@@ -61,6 +63,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         if (!userInput.trim()) return;
 
         setHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
+        setChatHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
 
         const formattedHistory = history.map(entry => [
             { role: "user", parts: [{ text: entry.user }] },
@@ -78,12 +81,18 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             setHistory((prevHistory) => prevHistory.map((entry, index) => 
             index === prevHistory.length - 1 ? { ...entry, bot: typingTestText } : entry
             ));
+            setChatHistory((prevHistory) => prevHistory.map((entry, index) => 
+                index === prevHistory.length - 1 ? { ...entry, bot: null } : entry
+            ));
         } else {
             setBotResponse(response.slice(5).trim());
             setParagraph({ text: null });
 
             setHistory((prevHistory) => prevHistory.map((entry, index) => 
             index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
+            ));
+            setChatHistory((prevHistory) => prevHistory.map((entry, index) => 
+                index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
             ));
         }
 
@@ -92,7 +101,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
 
     const rowOutput = (message, index, sender) => {
         if (sender === 'user') {
-            if (index != 0) {
+            if (index != 0 && message) {
                 return (
                     <>
                         <div className="flex justify-end">
@@ -109,7 +118,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 )
             }
         }
-        else {
+        else if (message) {
             return (
                 <>
                     <div className="flex justify-start">
@@ -133,6 +142,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             const initialMessage = "Hello! Would you like to start a typing test or ask a question?";
             setBotResponse(initialMessage);
             setHistory([{ user: "Bot", bot: initialMessage }]); // Add bot message to history
+            setChatHistory([{ user: "Bot", bot: initialMessage }]); // Add bot message to history
         };
 
         startConversation(); // Call function when the component loads
@@ -157,7 +167,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                     <div className="flex flex-col items-center">
                         <div className="bg-gray-700 h-[80vh] w-[29vw] overflow-scroll overflow-x-hidden min-w-18/12 md:min-w-14/10 lg:min-w-0">
                                 {
-                                    history.map((message,index) =>(
+                                    chatHistory.map((message,index) =>(
                                         <div key={index}>
                                             {/* User Response*/}
                                             {rowOutput(message.user, index, 'user')}
