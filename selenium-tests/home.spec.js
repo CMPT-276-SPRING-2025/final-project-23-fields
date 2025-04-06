@@ -1,4 +1,5 @@
 import { By, Builder, until } from 'selenium-webdriver';
+import { Options } from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
 
 (async function testSuite() {
@@ -6,8 +7,7 @@ import assert from 'assert';
 
     try {
         // Setup Chrome in headless mode for CI
-        const chrome = require('selenium-webdriver/chrome');
-        const options = new chrome.Options();
+        const options = new Options();
         options.addArguments('--headless');
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
