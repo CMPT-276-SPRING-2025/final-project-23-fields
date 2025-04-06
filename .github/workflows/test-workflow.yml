@@ -23,13 +23,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb
+          sudo apt-get install -y xvfb libgbm1
           npm ci
 
       - name: Build
         run: npm run build
 
-      - name: Deploy to DigitalOcean Staging
+      - name: Deploy to DigitalOcean
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
@@ -37,20 +37,17 @@ jobs:
       - name: Create deployment
         run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-      - name: Wait for deployment
+      - name: Setup Chrome and ChromeDriver
         run: |
-          echo "Waiting for deployment to be ready..."
-          sleep 30  # Give the app time to start
+          # Install specific Chrome version
+          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb
+          sudo apt install ./google-chrome-stable_114.0.5735.90-1_amd64.deb
 
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: "134.0.6998.88" # Update to match your system Chrome version
-
-      - name: Setup ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chromedriver-version: "134.0.6998.88" # Must match Chrome version
+          # Install matching ChromeDriver
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
 
       - name: Run Selenium tests
         env:
@@ -65,8 +62,9 @@ jobs:
           chromedriver --port=4444 &
           sleep 3
 
-          # Debug URL
-          echo "Testing against URL: $STAGING_URL"
-          
+          # Verify Chrome and ChromeDriver versions
+          google-chrome --version
+          chromedriver --version
+
           # Run tests
           npm run test
