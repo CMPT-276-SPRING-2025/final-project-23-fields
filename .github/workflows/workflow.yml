@@ -37,8 +37,17 @@ jobs:
       - name: Create deployment
         run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-      - name: Wait for deployment
-        run: sleep 30
+      - name: Wait for deployment and verify
+        run: |
+          echo "Waiting for deployment to be ready..."
+          for i in {1..12}; do
+            if curl -s "${{ secrets.STAGING_URL }}" > /dev/null; then
+              echo "Deployment is ready at ${{ secrets.STAGING_URL }}"
+              break
+            fi
+            echo "Waiting... ($i/12)"
+            sleep 10
+          done
 
       - name: Install Chrome
         run: |
@@ -66,12 +75,14 @@ jobs:
 
           # Start ChromeDriver
           chromedriver --port=4444 &
-          sleep 3
+          sleep 5
 
-          # Debug info
+          # Verify environment
           echo "Testing URL: $STAGING_URL"
-          google-chrome --version
-          chromedriver --version
+          if [ -z "$STAGING_URL" ]; then
+            echo "Error: STAGING_URL is not set"
+            exit 1
+          fi
 
           # Run tests
-          npm run test
+          NODE_ENV=staging npm run test
