@@ -59,7 +59,7 @@ describe('RoTypeAI Website Tests', function() {
         // Find and click next button by div id
         for(let i = 0; i < 5; i++) {
             const nextButton = await driver.wait(
-                until.elementLocated(By.css('div#next')), 
+                until.elementLocated(By.css('button div[id="next"]')),  // CORRECT
                 10000
             );
             await driver.executeScript("arguments[0].scrollIntoView(true);", nextButton);
@@ -74,23 +74,35 @@ describe('RoTypeAI Website Tests', function() {
         await driver.wait(until.urlContains('/Chatbot'), 10000);
         await driver.sleep(2000);
 
-        const inputField = await driver.wait(
-            until.elementLocated(By.css('input[placeholder="Ask RoTypeAI"]')),
+        // Wait for chat interface to load and be visible
+        const chatInterface = await driver.wait(
+            until.elementLocated(By.css('.bg-gray-700.shadow-md')),
             10000
         );
+        await driver.executeScript("arguments[0].scrollIntoView(true);", chatInterface);
+
+        // Find input field using more specific selector
+        const inputField = await driver.wait(
+            until.elementLocated(By.css('form.bg-neutral-900 input[type="text"]')),
+            10000
+        );
+        await driver.executeScript("arguments[0].scrollIntoView(true);", inputField);
         await inputField.clear();
         await inputField.sendKeys('Create a test about the Inca Empire');
         
+        // Find send button using more specific selector
         const sendButton = await driver.wait(
-            until.elementLocated(By.id('send')),
+            until.elementLocated(By.css('button#send.bg-neutral-900')),
             10000
         );
         await sendButton.click();
         
-        await driver.sleep(5000);
+        // Wait longer for API response
+        await driver.sleep(7000);
         
+        // Check for messages using correct selectors from Gemini component
         const messages = await driver.wait(
-            until.elementsLocated(By.css('#message .bg-neutral-900')),
+            until.elementsLocated(By.css('#message .bg-neutral-900.mr-\\[0\\.5vw\\]')),
             15000
         );
         assert.ok(messages.length > 0, 'No messages found');
