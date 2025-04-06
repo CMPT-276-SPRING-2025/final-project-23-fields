@@ -40,14 +40,18 @@ jobs:
       - name: Wait for deployment and verify
         id: get-url
         run: |
-          # Get app URL using doctl and remove any whitespace
+          # Get app URL using doctl
           STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header | tr -d '[:space:]')
-          echo "STAGING_URL=${STAGING_URL}" >> "$GITHUB_ENV"
-          echo "url=${STAGING_URL}" >> "$GITHUB_OUTPUT"
 
-          echo "Waiting for deployment to be ready at ${STAGING_URL}..."
+          # Debug URL
+          echo "Got URL: $STAGING_URL"
+
+          # Export for subsequent steps
+          echo "staging_url=$STAGING_URL" >> $GITHUB_OUTPUT
+
+          echo "Waiting for deployment to be ready at $STAGING_URL..."
           for i in {1..12}; do
-            if curl -s "${STAGING_URL}" > /dev/null; then
+            if curl -s "$STAGING_URL" > /dev/null; then
               echo "Deployment is ready!"
               break
             fi
@@ -72,12 +76,15 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: ${{ steps.get-url.outputs.url }}
+          STAGING_URL: ${{ steps.get-url.outputs.staging_url }}
           NODE_ENV: staging
         run: |
-          # Verify URL is set
-          if [ -z "$STAGING_URL" ]; then
-            echo "Error: STAGING_URL is not set"
+          # Debug URL
+          echo "STAGING_URL value: $STAGING_URL"
+
+          # Verify URL is set and valid
+          if [ -z "$STAGING_URL" ] || [ "$STAGING_URL" = "<nil>" ]; then
+            echo "Error: Invalid or missing STAGING_URL"
             exit 1
           fi
 
@@ -94,5 +101,5 @@ jobs:
           google-chrome --version
           chromedriver --version
 
-          # Run tests
-          npm run test
+          # Run tests with debugging
+          DEBUG=selenium-webdriver:* npm run test
