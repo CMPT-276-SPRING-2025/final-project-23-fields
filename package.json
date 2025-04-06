@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "mocha selenium-tests/test.spec.s --timeout 60000"
+    "test": "mocha selenium-tests/test.spec.js --timeout 60000"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
