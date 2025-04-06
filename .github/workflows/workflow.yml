@@ -38,48 +38,20 @@ jobs:
         id: deployment
         run: |
           echo "Creating deployment..."
-          DEPLOYMENT_ID=$(doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait --format ID --no-header)
-          echo "Deployment ID: $DEPLOYMENT_ID"
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-          # Wait for app to be active
-          echo "Waiting for deployment to be active..."
+          # Construct the URL directly from app ID
+          STAGING_URL="https://${APP_ID}.ondigitalocean.app"
+          echo "Using URL: $STAGING_URL"
+
+          # Verify the app is responding
           for i in {1..12}; do
-            DEPLOY_STATUS=$(doctl apps get-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} $DEPLOYMENT_ID --format Phase --no-header | tr -d '[:space:]')
-            echo "Current deployment status: $DEPLOY_STATUS"
-            
-            if [ "$DEPLOY_STATUS" = "ACTIVE" ]; then
-              echo "Deployment is active!"
-              
-              # Get the app URL using both formats to ensure we get a URL
-              APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header | tr -d '[:space:]')
-              if [ -z "$APP_URL" ]; then
-                APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
-              fi
-              
-              if [ -z "$APP_URL" ]; then
-                echo "Error: Could not get app URL"
-                exit 1
-              fi
-
-              # Set the URL with https:// prefix if not present
-              if [[ $APP_URL != https://* ]]; then
-                APP_URL="https://$APP_URL"
-              fi
-
-              # Export URL for subsequent steps
-              echo "staging_url=$APP_URL" >> $GITHUB_OUTPUT
-              echo "STAGING_URL=$APP_URL" >> $GITHUB_ENV
-              echo "Got URL: $APP_URL"
+            if curl -s "$STAGING_URL" > /dev/null; then
+              echo "App is responding at $STAGING_URL"
+              echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
               break
             fi
-            
-            if [ $i -eq 12 ]; then
-              echo "Timeout waiting for deployment"
-              doctl apps get-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} $DEPLOYMENT_ID --format Phase,Progress,Error
-              exit 1
-            fi
-            
-            echo "Waiting... ($i/12)"
+            echo "Waiting for app to respond... ($i/12)"
             sleep 10
           done
 
@@ -100,26 +72,14 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: ${{ steps.deployment.outputs.staging_url }}
-          NODE_ENV: staging
+          STAGING_URL: "https://${{ secrets.DIGITALOCEAN_APP_ID }}.ondigitalocean.app"
         run: |
-          # Debug URL before testing
-          echo "STAGING_URL before test: $STAGING_URL"
-
-          if [ -z "$STAGING_URL" ] || [ "$STAGING_URL" = "https://" ]; then
-            echo "Error: Invalid STAGING_URL"
-            doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL,DefaultIngress --no-header
-            exit 1
-          fi
-
-          # Start Xvfb
+          # Start services
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
           export DISPLAY=:99
-
-          # Start ChromeDriver
           chromedriver --port=4444 &
           sleep 5
 
-          # Run tests with URL debug output
-          echo "Running tests against: $STAGING_URL"
-          STAGING_URL="$STAGING_URL" npm run test
+          # Run tests with explicit URL
+          echo "Testing against: $STAGING_URL"
+          npm run test
