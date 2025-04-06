@@ -37,17 +37,19 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: "114.0.5735.90"
+          chrome-version: '134.0.6998.165'
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: "114.0.5735.90"
+          chromedriver-version: '134.0.6998.165'
 
       - name: Run Selenium tests
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
         run: |
+          export DISPLAY=:99
+          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
           chromedriver --port=4444 &
           sleep 3
           npm run test
