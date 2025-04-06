@@ -5,12 +5,6 @@ import Header from '../components/Header.jsx';
 import Mediawiki from '../components/mediawiki.jsx';
 
 function Chatbot() {  
-    // (string) keyword to use for searching wikipedia API, request for message amount 
-    const [searchKeyword, setSearchKeyword] = useState({request: "", keyword: ""});
-
-    // (string) extract containing text returned from searched Wikipedia article, missing for error confirmation
-    const [articleText, setArticleText] = useState({missing: true, extract: ""});
-
     // @text (string) generated typing test data
     const [paragraph, setParagraph] = useState({
         text: null
