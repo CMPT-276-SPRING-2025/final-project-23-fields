@@ -42,7 +42,7 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: 'stable'
+          chrome-version: '114.0.5735.90'
 
       - name: Install Chrome dependencies
         run: |
@@ -58,15 +58,14 @@ jobs:
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          # Use the matching Chrome version
-          chromedriver-version: "${{ steps.chrome-version.outputs.CHROME_VERSION }}.0.0"
+          chromedriver-version: '114.0.5735.90'
 
       - name: Start Chrome Driver
         run: |
           export DISPLAY=:99
           chromedriver --version
           google-chrome --version
-          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
+          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
 
       - name: Run Selenium tests on staging
         env:
@@ -74,11 +73,11 @@ jobs:
           DISPLAY: :99
         run: |
           # Start Xvfb
-          sudo Xvfb :99 -screen 0 1920x1080x24 &
+          sudo Xvfb :99 -screen 0 1920x1080x24 & 
           sleep 3
           
           # Start ChromeDriver
-          chromedriver --port=4444 &
+          chromedriver --port=4444 & 
           sleep 3
           
           # Run tests with verbose logging
