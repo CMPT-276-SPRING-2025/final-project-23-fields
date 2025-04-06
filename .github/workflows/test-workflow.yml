@@ -37,6 +37,11 @@ jobs:
       - name: Create deployment
         run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to be ready..."
+          sleep 30  # Give the app time to start
+
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
@@ -50,14 +55,18 @@ jobs:
       - name: Run Selenium tests
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
+          NODE_ENV: staging
         run: |
           # Start Xvfb
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
           export DISPLAY=:99
 
-          # Start ChromeDriver and wait
+          # Start ChromeDriver
           chromedriver --port=4444 &
           sleep 3
 
-          # Run tests with debugging
-          DEBUG=selenium-webdriver:* npm run test
+          # Debug URL
+          echo "Testing against URL: $STAGING_URL"
+          
+          # Run tests
+          npm run test
