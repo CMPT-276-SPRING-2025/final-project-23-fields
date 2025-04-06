@@ -71,62 +71,49 @@ describe('RoTypeAI Website Tests', function() {
 
     it('should test chatbot functionality', async function() {
         try {
-            // Navigate back to home first
+            // Start from home and verify React is mounted
             await driver.get(baseUrl);
-            await driver.wait(until.titleIs('RoTypeAI'), 10000);
+            await driver.wait(async () => {
+                const elements = await driver.findElements(By.css('.font-jost.font-bold'));
+                return elements.length > 0;
+            }, 15000, 'Home page not loaded');
             
-            // Use the Jump In button like a real user would
-            const jumpInButton = await driver.wait(
-                until.elementLocated(By.id('jumpin')),
+            // Click Jump In using parent Link element
+            const jumpInLink = await driver.wait(
+                until.elementLocated(By.css('a#jumpin')), 
                 15000
             );
-            await jumpInButton.click();
+            await jumpInLink.click();
             
-            // Wait for navigation and page load
+            // Wait for URL change and React mount
             await driver.wait(until.urlContains('/Chatbot'), 15000);
-            await driver.sleep(5000);  // Give React time to hydrate
+            await driver.wait(async () => {
+                const elements = await driver.findElements(By.css('.bg-gray-700.shadow-md'));
+                return elements.length > 0;
+            }, 20000, 'Chat interface not loaded');
 
-            // Look for the chat container using the exact classes from Chatbot.jsx
-            const chatContainer = await driver.wait(
-                until.elementLocated(By.css('.bg-gray-200.flex.h-screen.justify-center')),
-                20000
-            );
-            
-            // Then find the chat interface inside the container
-            const chatInterface = await chatContainer.findElement(
-                By.css('.flex.flex-col.bg-gray-700.shadow-md')
-            );
-            
-            // Find the input form and field
-            const inputForm = await chatInterface.findElement(
-                By.css('form.bg-neutral-900')
-            );
-            const inputField = await inputForm.findElement(
-                By.css('input[type="text"]')
-            );
-
-            // Enter text
-            await inputField.sendKeys('Create a test about the Inca Empire');
-            
-            // Find and click send button
-            const sendButton = await inputForm.findElement(By.xpath('following-sibling::button[@id="send"]'));
-            await sendButton.click();
-            
-            // Wait for response
-            await driver.sleep(7000);
-            
-            // Verify messages appear
-            const messages = await driver.wait(
-                until.elementsLocated(By.css('#message .bg-neutral-900')),
+            // Get input field and send message
+            const inputField = await driver.wait(
+                until.elementLocated(By.css('form.bg-neutral-900 input[type="text"]')),
                 15000
             );
-            assert.ok(messages.length > 0, 'No messages found');
+            await inputField.sendKeys('Create a test about the Inca Empire');
+
+            // Find and click send button
+            const sendButton = await driver.findElement(By.id('send'));
+            await sendButton.click();
+
+            // Verify chat message appears
+            await driver.wait(async () => {
+                const messages = await driver.findElements(By.css('#message .bg-neutral-900'));
+                return messages.length > 0;
+            }, 15000, 'No chat messages found');
 
         } catch (error) {
             console.error('Error in chatbot test:', error);
-            // Take screenshot for debugging
-            const screenshot = await driver.takeScreenshot();
-            await fs.writeFile('error-screenshot.png', screenshot, 'base64');
+            // Log page source for debugging
+            const source = await driver.getPageSource();
+            console.error('Page source:', source);
             throw error;
         }
     });
