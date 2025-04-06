@@ -39,29 +39,44 @@ jobs:
         run: |
           doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-      - name: Setup Chrome and xvfb
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 'stable'
+
+      - name: Get Chrome version
+        id: chrome-version
         run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb x11-xkb-utils xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic x11-apps
-          export DISPLAY=:99
-          Xvfb :99 -ac -screen 0 1920x1080x24 > /dev/null 2>&1 &
-          sleep 3
+          echo "CHROME_VERSION=$(google-chrome --version | awk '{ print $3 }' | cut -d'.' -f1)" >> $GITHUB_OUTPUT
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: 'latest'
+          chromedriver-version: '114.0.5735.90'  # Use a specific stable version
+
+      - name: Start Chrome Driver
+        run: |
+          export DISPLAY=:99
+          chromedriver --version
+          chrome --version
+          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
 
       - name: Run Selenium tests on staging
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
           DISPLAY: :99
         run: |
-          # Start xvfb in the background
+          # Start Xvfb
           Xvfb :99 -screen 0 1920x1080x24 &
           
-          # Wait for Xvfb to start
+          # Wait for Xvfb
           sleep 3
           
-          # Run the tests
+          # Start ChromeDriver
+          chromedriver --port=4444 &
+          
+          # Wait for ChromeDriver
+          sleep 3
+          
+          # Run tests
           npx mocha selenium-tests/home.spec.js --timeout 60000
