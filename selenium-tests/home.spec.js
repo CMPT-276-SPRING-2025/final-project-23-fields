@@ -8,20 +8,25 @@ import assert from 'assert';
     try {
         // Setup Chrome in headless mode for CI
         const options = new Options();
-        options.addArguments('--headless');  // Changed from '--headless=new'
+        options.addArguments('--headless=new');
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
-        options.addArguments('--disable-gpu');  
-        options.addArguments('--window-size=1920,1080'); 
-        options.addArguments('--ignore-certificate-errors');
+        options.addArguments('--disable-gpu');
+        options.addArguments('--window-size=1920,1080');
+        options.addArguments('--remote-debugging-port=9222');
         options.addArguments('--disable-extensions');
-        options.addArguments('--disable-web-security');
-        options.addArguments('--allow-running-insecure-content');
+        options.addArguments('--enable-logging');
+        options.addArguments('--v=1');
 
         driver = await new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options)
             .build();
+
+        // Add error handler
+        driver.on('error', (e) => {
+            console.error('WebDriver error:', e);
+        });
 
         // Use staging URL if available, otherwise use localhost
         const baseUrl = process.env.NODE_ENV === 'staging' 
