@@ -35,6 +35,7 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Create deployment and wait
+        id: deployment
         run: |
           echo "Creating deployment..."
           DEPLOYMENT_ID=$(doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait --format ID --no-header)
@@ -49,10 +50,26 @@ jobs:
             if [ "$DEPLOY_STATUS" = "ACTIVE" ]; then
               echo "Deployment is active!"
               
-              # Get and verify app URL
-              STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
-              echo "STAGING_URL=https://$STAGING_URL" >> $GITHUB_ENV
+              # Get the app URL using both formats to ensure we get a URL
+              APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header | tr -d '[:space:]')
+              if [ -z "$APP_URL" ]; then
+                APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
+              fi
               
+              if [ -z "$APP_URL" ]; then
+                echo "Error: Could not get app URL"
+                exit 1
+              fi
+
+              # Set the URL with https:// prefix if not present
+              if [[ $APP_URL != https://* ]]; then
+                APP_URL="https://$APP_URL"
+              fi
+
+              # Export URL for subsequent steps
+              echo "staging_url=$APP_URL" >> $GITHUB_OUTPUT
+              echo "STAGING_URL=$APP_URL" >> $GITHUB_ENV
+              echo "Got URL: $APP_URL"
               break
             fi
             
@@ -65,29 +82,6 @@ jobs:
             echo "Waiting... ($i/12)"
             sleep 10
           done
-
-      - name: Wait for deployment and verify
-        id: get-url
-        run: |
-          # Get app URL with verification
-          for i in {1..5}; do
-            STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header | tr -d '[:space:]')
-            
-            if [ ! -z "$STAGING_URL" ]; then
-              echo "Got URL: $STAGING_URL"
-              echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
-              echo "url=$STAGING_URL" >> $GITHUB_OUTPUT
-              break
-            fi
-            
-            echo "Retrying URL fetch... ($i/5)"
-            sleep 5
-          done
-
-          if [ -z "$STAGING_URL" ]; then
-            echo "Error: Could not get app URL"
-            exit 1
-          fi
 
       - name: Install Chrome
         run: |
@@ -106,14 +100,15 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: ${{ env.staging_url }}
+          STAGING_URL: ${{ steps.deployment.outputs.staging_url }}
           NODE_ENV: staging
         run: |
           # Debug URL before testing
-          echo "STAGING_URL before test: ${STAGING_URL}"
+          echo "STAGING_URL before test: $STAGING_URL"
 
-          if [ -z "${STAGING_URL}" ] || [ "${STAGING_URL}" = "https://" ]; then
+          if [ -z "$STAGING_URL" ] || [ "$STAGING_URL" = "https://" ]; then
             echo "Error: Invalid STAGING_URL"
+            doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL,DefaultIngress --no-header
             exit 1
           fi
 
@@ -126,5 +121,5 @@ jobs:
           sleep 5
 
           # Run tests with URL debug output
-          echo "Running tests against: ${STAGING_URL}"
-          STAGING_URL="${STAGING_URL}" npm run test
+          echo "Running tests against: $STAGING_URL"
+          STAGING_URL="$STAGING_URL" npm run test
