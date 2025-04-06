@@ -44,21 +44,28 @@ jobs:
         with:
           chrome-version: 'stable'
 
-      - name: Get Chrome version
+      - name: Install Chrome dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Get Chrome version for ChromeDriver
         id: chrome-version
         run: |
-          echo "CHROME_VERSION=$(google-chrome --version | awk '{ print $3 }' | cut -d'.' -f1)" >> $GITHUB_OUTPUT
+          CHROME_VERSION=$(google-chrome --version | cut -d " " -f 3 | cut -d "." -f 1)
+          echo "CHROME_VERSION=$CHROME_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: '114.0.5735.90'  # Use a specific stable version
+          # Use the matching Chrome version
+          chromedriver-version: "${{ steps.chrome-version.outputs.CHROME_VERSION }}.0.0"
 
       - name: Start Chrome Driver
         run: |
           export DISPLAY=:99
           chromedriver --version
-          chrome --version
+          google-chrome --version
           sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
 
       - name: Run Selenium tests on staging
@@ -67,16 +74,12 @@ jobs:
           DISPLAY: :99
         run: |
           # Start Xvfb
-          Xvfb :99 -screen 0 1920x1080x24 &
-          
-          # Wait for Xvfb
+          sudo Xvfb :99 -screen 0 1920x1080x24 &
           sleep 3
           
           # Start ChromeDriver
           chromedriver --port=4444 &
-          
-          # Wait for ChromeDriver
           sleep 3
           
-          # Run tests
-          npx mocha selenium-tests/home.spec.js --timeout 60000
+          # Run tests with verbose logging
+          DEBUG=selenium-webdriver:* npx mocha selenium-tests/home.spec.js --timeout 60000
