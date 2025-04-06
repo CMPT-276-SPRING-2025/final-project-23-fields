@@ -1,7 +1,7 @@
 import { By, Builder, until } from 'selenium-webdriver';
 import { Options } from 'selenium-webdriver/chrome.js';
 import assert from 'assert';
-import fs from 'fs/promises'; // Use ES modules for file system
+import fs from 'fs/promises'; 
 
 describe('RoTypeAI Website Tests', function() {
     let driver;
@@ -60,7 +60,7 @@ describe('RoTypeAI Website Tests', function() {
         // Find and click next button by div id
         for(let i = 0; i < 5; i++) {
             const nextButton = await driver.wait(
-                until.elementLocated(By.css('button div[id="next"]')),  // CORRECT
+                until.elementLocated(By.css('button div[id="next"]')),  
                 10000
             );
             await driver.executeScript("arguments[0].scrollIntoView(true);", nextButton);
@@ -73,7 +73,7 @@ describe('RoTypeAI Website Tests', function() {
         try {
             // Navigate back to home and wait for full page load
             await driver.get(baseUrl);
-            await driver.sleep(3000); // Wait for initial load
+            await driver.sleep(3000); 
             
             // Wait for title element to be visible using a more specific selector
             const titleElement = await driver.wait(
@@ -132,9 +132,6 @@ describe('RoTypeAI Website Tests', function() {
 
         } catch (error) {
             console.error('Error in chatbot test:', error);
-            // Take screenshot for debugging
-            const screenshot = await driver.takeScreenshot();
-            await fs.writeFile('error-screenshot.png', screenshot, 'base64');
             throw error;
         }
     });
