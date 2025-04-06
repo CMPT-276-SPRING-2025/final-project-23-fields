@@ -17,10 +17,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "18"
+          cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Deploy to DigitalOcean Staging
         uses: digitalocean/action-doctl@v2
@@ -33,12 +37,12 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: "114.0.5735.90"
+          chrome-version: "stable"
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: "114.0.5735.90"
+          chromedriver-version: "stable"
 
       - name: Run Selenium tests
         env:
@@ -46,4 +50,4 @@ jobs:
         run: |
           chromedriver --port=4444 &
           sleep 3
-          NODE_ENV=staging npx mocha selenium-tests/home.spec.js --timeout 60000
+          npm run test
