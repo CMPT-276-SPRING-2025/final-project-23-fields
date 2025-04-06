@@ -1,93 +1,73 @@
-import { useEffect, useState } from "react";
+const errorCode = {
+    1: {missing: true, extract: "Improper search query. This is likely a formatting error caused by Gemini"},
+    2: {missing: true, extract: "Wiki Page does not exist!"}
+}
 
-export default function Mediawiki({searchKeyword, setArticleText}) {
-    
-    // (String) url containing the needed parameters dependent on request
-    const [url, setUrl] = useState('Waiting on Search...');
-
-    // Base parameters for url
-    const params = {
-        action: "query",
-        format: "json",
-        prop: "extracts",
-        titles: searchKeyword.keyword,
-        utf8: "1",
-        formatversion: "2",
-        explaintext: "1",
-        origin: "*",
-        redirects: "1"
+class queryParams {
+    constructor(request, keyword) {
+        this.action = "query";
+        this.format = "json";
+        this.origin = "*";
+        this.formatversion = "2";
+        // Construct parameters for searching a title
+        if (request === "search") {
+            this.list = "search";
+            this.srsearch = keyword;
+            this.srlimit = 1;
+        // Construct parameters for fetching page source
+        } else {
+            this.utf8 = "1";
+            this.prop = "extracts";
+            this.titles = keyword;
+            this.explaintext = "1";
+            this.redirects = "1";
+            if (request === "description") this.exsentences = "3";
+        }        
     }
+}
 
-    // Takes in: params, changes params with additional key value pair without returning anything
-    const setParam = (params) => {
-        if (searchKeyword.request === "description") {
-            params.exsentences = "3";
-        }
-    }
+// Uses newly created url to fetch the article text, filtering it, and change useState articleText
+const getArticle = async (request, keyword, searchUrl) => {
+    try {
+        // fetch text
+        const response = await fetch(searchUrl);
+        const data = await response.json();
 
-    // Takes in nothing, updates url using setUrl with parameters being added to link
-    const addUrlParams = () => {
-        let newLink = "https://en.wikipedia.org/w/api.php?";
-
-        Object.keys(params).forEach(key => {
-            newLink += "&" + key + "=" + encodeURIComponent(params[key]);
-        });
-
-        setUrl(newLink);
-    }
-
-    // Uses newly created url to fetch the article text, filtering it, and change useState articleText
-    const getArticle = async () => {
-        try {
-            // fetch text
-            const response = await fetch(url);
-            const data = await response.json();
-
+        // if request is of search type
+        if (request === "search") {
+            if (data.query.search[0].title !== undefined) {
+                const article = data.query.search[0].title;
+                return {missing: false, extract: article};
+            } else {
+                throw new Error(`Search query ${keyword} did not turn up any results!`)
+            }
+        // if request is of page fetch type
+        } else {
             // if text exists
             if (data.query.pages[0].extract !== undefined) {
                 const article = data.query.pages[0].extract;
-                // If request is a search, filter the text
-                if (searchKeyword.request === "search") {
-                    const filteredText = article.match(/(?:.*?(==)+){6}.*?((==)+)/s);
-                    // If filteredText is true (article must have 3 or more sections) change useState else use normal pre-filter text.
-                    if (filteredText) {
-                        setArticleText({missing: false, extract: filteredText[0]});
-                    } else {
-                        setArticleText({missing: false, extract: article});
-                    }
-                // if request is a description, change useState
-                } else if (searchKeyword.request === "description") {
-                    setArticleText({missing: false, extract: article});
-                }
+                // filter the text
+                const filteredText = article.replace(/[=]/g, "");
+                return {missing: false, extract: filteredText};
             // if text does not exist, throw error for user
-            } else if (data.query.pages[0].missing) {
-                throw new Error(`Wiki Page for ${searchKeyword.keyword} does not exist!`);
+            } else {
+                throw new Error(`Wiki Page for ${keyword} does not exist!`);
             }
-        } catch (error) {
-            // change useState extract to error message to give to the bot
-            setArticleText({missing: true, extract: error.message});
-            console.error("Error fetching Wiki page: ", error);
         }
+    } catch (error) {
+        // change useState extract to error message to give to the bot
+        console.error("Error fetching Wiki page: ", error);
+        return {missing: true, extract: error}
     }
+}
 
-    // Calls when keyword gets changed, use this to communicate with Gemini.jsx(Having gemini change the keyword to what the user said will call this)
-    useEffect (() => {
-        {/* Option Chaining so useEffect is not used when initially defined as empty */}
-        if (searchKeyword?.request === '' || searchKeyword?.keyword === '') {
-            return
-        }
-        else {
-            setParam(params);
-            addUrlParams();
-        }
-    }, [searchKeyword])
-
-    // Once url is changed to new url it calls this useEffect to start fetch with getArticle(). 
-    useEffect(() => {
-        {/* Option Chaining so useEffect is not used when initially defined as empty */}
-        if (url !== 'Waiting on Search...') {
-            getArticle(url);
-        }
-    }, [url])
-
+export async function callWikipediaAPI(request, keyword) {
+    if (!request || ! keyword || !["search", "page", "description"].includes(request)) return errorCode[1];
+    const param = new queryParams(request, keyword);
+    let newLink = "https://en.wikipedia.org/w/api.php?";
+    Object.keys(param).forEach(key => {
+        newLink += "&" + key + "=" + encodeURIComponent(param[key]);
+    });
+    const extract = await getArticle(request, keyword, newLink);
+    return extract;
 }

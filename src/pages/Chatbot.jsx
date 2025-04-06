@@ -80,7 +80,6 @@ function Chatbot() {
                 botResponse={botResponse} setBotResponse={setBotResponse} 
                 userInput={userInput} setUserInput={setUserInput} 
                 updateParagraph={updateParagraph} results={results}/>
-                <Mediawiki searchKeyword={searchKeyword} setArticleText={setArticleText}/>
             </div>
        </> 
     );
