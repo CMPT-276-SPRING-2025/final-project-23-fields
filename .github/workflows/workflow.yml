@@ -37,21 +37,28 @@ jobs:
       - name: Create deployment and wait
         run: |
           echo "Creating deployment..."
-          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+          DEPLOYMENT_ID=$(doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait --format ID --no-header)
+          echo "Deployment ID: $DEPLOYMENT_ID"
 
-          # Wait for app to be running
-          echo "Waiting for app to be running..."
+          # Wait for app to be active
+          echo "Waiting for deployment to be active..."
           for i in {1..12}; do
-            APP_STATUS=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format Status --no-header | tr -d '[:space:]')
-            echo "Current status: $APP_STATUS"
+            DEPLOY_STATUS=$(doctl apps get-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} $DEPLOYMENT_ID --format Phase --no-header | tr -d '[:space:]')
+            echo "Current deployment status: $DEPLOY_STATUS"
             
-            if [ "$APP_STATUS" = "running" ]; then
-              echo "App is running!"
+            if [ "$DEPLOY_STATUS" = "ACTIVE" ]; then
+              echo "Deployment is active!"
+              
+              # Get and verify app URL
+              STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
+              echo "STAGING_URL=https://$STAGING_URL" >> $GITHUB_ENV
+              
               break
             fi
             
             if [ $i -eq 12 ]; then
-              echo "Timeout waiting for app to run"
+              echo "Timeout waiting for deployment"
+              doctl apps get-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} $DEPLOYMENT_ID --format Phase,Progress,Error
               exit 1
             fi
             
