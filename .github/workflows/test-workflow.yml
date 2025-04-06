@@ -21,7 +21,10 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          npm ci
 
       - name: Build
         run: npm run build
@@ -37,19 +40,24 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: '134.0.6998.165'
+          chrome-version: "114.0.5735.90"
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: '134.0.6998.165'
+          chromedriver-version: "114.0.5735.90"
 
       - name: Run Selenium tests
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
         run: |
+          # Start Xvfb
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
           export DISPLAY=:99
-          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+
+          # Start ChromeDriver and wait
           chromedriver --port=4444 &
           sleep 3
-          npm run test
+
+          # Run tests with debugging
+          DEBUG=selenium-webdriver:* npm run test
