@@ -5,11 +5,26 @@ import assert from 'assert';
     let driver; 
 
     try {
-        driver = await new Builder().forBrowser('chrome').build();
+        // Setup Chrome in headless mode for CI
+        const chrome = require('selenium-webdriver/chrome');
+        const options = new chrome.Options();
+        options.addArguments('--headless');
+        options.addArguments('--no-sandbox');
+        options.addArguments('--disable-dev-shm-usage');
+
+        driver = await new Builder()
+            .forBrowser('chrome')
+            .setChromeOptions(options)
+            .build();
+
+        // Use staging URL if available, otherwise use localhost
+        const baseUrl = process.env.NODE_ENV === 'staging' 
+            ? process.env.STAGING_URL 
+            : 'http://localhost:5173';
 
         console.log("BLACK BOX TESTING")
         // Test Home Page
-        await driver.get('http://localhost:5173');
+        await driver.get(baseUrl);
         let homeTitle = await driver.getTitle();
         console.log('Home Page title is:', homeTitle);
         assert.equal(homeTitle, "RoTypeAI");
