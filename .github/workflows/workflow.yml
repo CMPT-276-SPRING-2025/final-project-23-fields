@@ -40,26 +40,30 @@ jobs:
       - name: Wait for deployment and verify
         id: get-url
         run: |
-          # Get app URL using doctl with debug output
-          echo "Getting app URL..."
-          APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
-          STAGING_URL="https://${APP_URL}"
+          # Get app URL directly from doctl
+          STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header)
 
-          echo "Full URL: ${STAGING_URL}"
+          # Clean and verify URL
+          STAGING_URL=$(echo $STAGING_URL | tr -d '[:space:]')
 
-          # Set environment variable for subsequent steps
-          echo "staging_url=${STAGING_URL}" >> $GITHUB_ENV
+          if [ -z "$STAGING_URL" ]; then
+            echo "Error: Could not get app URL"
+            doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL,DefaultIngress --no-header
+            exit 1
+          fi
 
-          # Wait for deployment
-          echo "Waiting for deployment to be ready..."
-          for i in {1..12}; do
-            if curl -s "${STAGING_URL}" > /dev/null; then
-              echo "Deployment is ready at: ${STAGING_URL}"
-              break
-            fi
-            echo "Waiting... ($i/12)"
-            sleep 10
-          done
+          echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
+          echo "url=$STAGING_URL" >> $GITHUB_OUTPUT
+
+          echo "Got staging URL: $STAGING_URL"
+
+      - name: Verify app status
+        run: |
+          APP_STATUS=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format Status --no-header)
+          if [ "$APP_STATUS" != "running" ]; then
+            echo "Error: App is not running (status: $APP_STATUS)"
+            exit 1
+          fi
 
       - name: Install Chrome
         run: |
