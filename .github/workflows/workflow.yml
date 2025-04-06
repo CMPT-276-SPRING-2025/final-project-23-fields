@@ -40,11 +40,17 @@ jobs:
           echo "Creating deployment..."
           doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
 
-          # Get the actual app URL from doctl
+          # Get the actual app URL from doctl and verify it
           APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header)
-          STAGING_URL="https://${APP_URL}"
-          echo "Got URL: ${STAGING_URL}"
-          echo "STAGING_URL=${STAGING_URL}" >> $GITHUB_ENV
+          if [ -z "$APP_URL" ]; then
+            echo "Error: Could not get app URL"
+            exit 1
+          fi
+          
+          # Set the URL for subsequent steps
+          STAGING_URL="https://$APP_URL"
+          echo "Got URL: $STAGING_URL"
+          echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
 
       - name: Install Chrome
         run: |
@@ -63,7 +69,7 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: "https://${{ secrets.DIGITALOCEAN_APP_ID }}.ondigitalocean.app"
+          STAGING_URL: ${{ env.STAGING_URL }}  # Use the URL from previous step instead of constructing a new one
         run: |
           # Start services
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
@@ -71,6 +77,9 @@ jobs:
           chromedriver --port=4444 &
           sleep 5
 
-          # Run tests with explicit URL
+          # Debug URL
           echo "Testing against: $STAGING_URL"
+          curl -v "$STAGING_URL" || echo "URL not accessible"
+
+          # Run tests
           npm run test
