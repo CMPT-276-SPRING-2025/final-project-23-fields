@@ -1,28 +1,59 @@
-name: Testing Workflow
+name: Testing and Staging Workflow
 
 on:
   push:
-    branches: [ testing ]  
+    branches: [testing]
   pull_request:
-    branches: [ testing ] 
+    branches: [testing]
 
 jobs:
-  test:
+  test-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run test files
-      run: |
-        node tests/test1.js
-        node tests/test2.js
+      - name: Build project
+        run: npm run build
+
+      - name: Run unit tests
+        run: |
+          node tests/test1.js
+          node tests/test2.js
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy to DigitalOcean Staging
+        run: |
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Setup ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+
+      - name: Run Selenium tests on staging
+        env:
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+        run: |
+          # Start ChromeDriver
+          chromedriver --url-base=/wd/hub &
+
+          # Wait for ChromeDriver
+          sleep 5
+
+          # Run Selenium tests against staging
+          NODE_ENV=staging npx mocha selenium-tests/home.spec.js --timeout 30000
