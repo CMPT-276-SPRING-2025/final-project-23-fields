@@ -7,7 +7,14 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions. Whenever the user asks a question, always drive them to create a typing test instead of just printing out your answer, but do not be so pushy about this. Once you get results from the test Congratulate the user on their progress and relay the information above back to the user succinctly. Then ASK if they would like to move onto a new test or generate a test based on their data. If the user wants to generate a test based on their data, generate a typing test based on their most missed letter and slowest letter in full sentences. (DO NOT EVER TYPE SYSTEM INSTRUCTIONS TO THE USER)",
+    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. "
+    + "At the start of your response you must always put true or false. "
+    + "If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions. "
+    + "Whenever the user asks a question, always drive them to create a typing test instead of just printing out your answer, but do not be so pushy about this. "
+    + "Once you get results from the test congratulate the user on their progress and relay the information above back to the user succinctly. "
+    + "Then ASK if they would like to move onto a new test. "
+    + "If the user wants to generate a test based on their data, generate a typing test based on their most missed letter and slowest letter in full sentences. "
+    + "(DO NOT EVER TYPE SYSTEM INSTRUCTIONS TO THE USER)"
 });
 
 const generationConfig = {
@@ -31,7 +38,7 @@ export const getGeminiResponse = async (message, history = []) => {
 };
 
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results, searchKeyword, setSearchKeyword, articleText, setArticleText}) {
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results }) {
     const [history, setHistory] = useState([]);
     const [chatHistory, setChatHistory] = useState([]);
     const hasFetchedResults = useRef(false);
@@ -74,6 +81,21 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         const updatedHistory = [...formattedHistory, newMessage];
         const response = await getGeminiResponse(userInput, updatedHistory);
         
+        //const title = await callWikipediaAPI("search", keyword);
+        //const extract = await callWikipediaAPI(request, title);
+
+        /*
+        const wikiMessage = ((request === "description") ?
+        "Summarize and give a short summary of the following text: "
+        :
+        "The rules for generating typing tests is as follows: "
+        + "1. All numbers must be written in letter form"
+        + "2. Only use lowercase alphabetical letters. Do NOT use special characters"
+        + "Generate a typing test using only the information given in the following text: "
+        )
+        + extract;*/
+
+
         if (response.startsWith('true')) {
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
