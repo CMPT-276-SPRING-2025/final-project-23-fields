@@ -8,27 +8,17 @@ import assert from 'assert';
     try {
         // Setup Chrome in headless mode for CI
         const options = new Options();
-        options.addArguments('--headless');  // Simplified headless argument
+        options.addArguments('--headless=new');
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
         options.addArguments('--disable-gpu');
         options.addArguments('--window-size=1920,1080');
-        options.addArguments('--disable-software-rasterizer');
-        options.addArguments('--disable-extensions');
-        options.addArguments('--ignore-certificate-errors');
 
-        // Log the Chrome version
-        console.log('Chrome options:', options);
-
+        // Create driver
         driver = await new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options)
             .build();
-
-        // Add error handler
-        driver.on('error', (e) => {
-            console.error('WebDriver error:', e);
-        });
 
         // Use staging URL if available, otherwise use localhost
         const baseUrl = process.env.NODE_ENV === 'staging' 

@@ -33,20 +33,17 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: "stable"
+          chrome-version: "114.0.5735.90"
 
       - name: Setup ChromeDriver
         uses: nanasess/setup-chromedriver@v2
         with:
-          chromedriver-version: "stable"
+          chromedriver-version: "114.0.5735.90"
 
       - name: Run Selenium tests
         env:
           STAGING_URL: ${{ secrets.STAGING_URL }}
         run: |
-          # Start ChromeDriver
           chromedriver --port=4444 &
           sleep 3
-
-          # Run tests
           NODE_ENV=staging npx mocha selenium-tests/home.spec.js --timeout 60000
