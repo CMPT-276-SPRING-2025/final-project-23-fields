@@ -7,17 +7,19 @@ import assert from 'assert';
 
     try {
         // Setup Chrome in headless mode for CI
-                const options = new Options();
-        options.addArguments('--headless=new'); 
+        const options = new Options();
+        options.addArguments('--headless');  // Changed from '--headless=new'
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
         options.addArguments('--disable-gpu');  
         options.addArguments('--window-size=1920,1080'); 
-        options.addArguments('--start-maximized');
-        options.addArguments('--remote-allow-origins=*');
+        options.addArguments('--ignore-certificate-errors');
+        options.addArguments('--disable-extensions');
+        options.addArguments('--disable-web-security');
+        options.addArguments('--allow-running-insecure-content');
 
         driver = await new Builder()
-.forBrowser('chrome')
+            .forBrowser('chrome')
             .setChromeOptions(options)
             .build();
 
