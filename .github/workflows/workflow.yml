@@ -39,10 +39,15 @@ jobs:
 
       - name: Wait for deployment and verify
         run: |
+          # Get app URL using doctl
+          STAGING_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format AppURL --no-header)
+          echo "Setting STAGING_URL=$STAGING_URL"
+          echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
+
           echo "Waiting for deployment to be ready..."
           for i in {1..12}; do
-            if curl -s "${{ secrets.STAGING_URL }}" > /dev/null; then
-              echo "Deployment is ready at ${{ secrets.STAGING_URL }}"
+            if curl -s "$STAGING_URL" > /dev/null; then
+              echo "Deployment is ready!"
               break
             fi
             echo "Waiting... ($i/12)"
@@ -66,7 +71,7 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: ${{ secrets.STAGING_URL }}
+          STAGING_URL: ${{ env.STAGING_URL }}
           NODE_ENV: staging
         run: |
           # Start Xvfb
@@ -77,12 +82,10 @@ jobs:
           chromedriver --port=4444 &
           sleep 5
 
-          # Verify environment
+          # Debug info
           echo "Testing URL: $STAGING_URL"
-          if [ -z "$STAGING_URL" ]; then
-            echo "Error: STAGING_URL is not set"
-            exit 1
-          fi
+          google-chrome --version
+          chromedriver --version
 
           # Run tests
-          NODE_ENV=staging npm run test
+          npm run test
