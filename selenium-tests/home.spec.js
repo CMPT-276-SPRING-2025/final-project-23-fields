@@ -7,13 +7,17 @@ import assert from 'assert';
 
     try {
         // Setup Chrome in headless mode for CI
-        const options = new Options();
-        options.addArguments('--headless');
+                const options = new Options();
+        options.addArguments('--headless=new'); 
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
+        options.addArguments('--disable-gpu');  
+        options.addArguments('--window-size=1920,1080'); 
+        options.addArguments('--start-maximized');
+        options.addArguments('--remote-allow-origins=*');
 
         driver = await new Builder()
-            .forBrowser('chrome')
+.forBrowser('chrome')
             .setChromeOptions(options)
             .build();
 
@@ -126,7 +130,7 @@ import assert from 'assert';
         console.log('Bot response:', botResponse);
         assert.ok(botResponse.length > 0, "Bot did not respond");
         console.log("ALL TESTS PASS")
-
+        
     } catch (error) {
         console.error('Error during tests:', error);
     } finally {
