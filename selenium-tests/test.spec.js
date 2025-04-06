@@ -71,49 +71,70 @@ describe('RoTypeAI Website Tests', function() {
 
     it('should test chatbot functionality', async function() {
         try {
-            // Start from home and verify React is mounted
+            // Navigate back to home and wait for full page load
             await driver.get(baseUrl);
-            await driver.wait(async () => {
-                const elements = await driver.findElements(By.css('.font-jost.font-bold'));
-                return elements.length > 0;
-            }, 15000, 'Home page not loaded');
+            await driver.sleep(3000); // Wait for initial load
             
-            // Click Jump In using parent Link element
-            const jumpInLink = await driver.wait(
-                until.elementLocated(By.css('a#jumpin')), 
-                15000
+            // Wait for title element to be visible using a more specific selector
+            const titleElement = await driver.wait(
+                until.elementLocated(By.css('.text-\\[3rem\\].text-blue-600.font-jost.font-bold')), 
+                15000,
+                'Title not found'
             );
-            await jumpInLink.click();
-            
-            // Wait for URL change and React mount
-            await driver.wait(until.urlContains('/Chatbot'), 15000);
-            await driver.wait(async () => {
-                const elements = await driver.findElements(By.css('.bg-gray-700.shadow-md'));
-                return elements.length > 0;
-            }, 20000, 'Chat interface not loaded');
+            await driver.wait(until.elementIsVisible(titleElement), 15000);
 
-            // Get input field and send message
-            const inputField = await driver.wait(
-                until.elementLocated(By.css('form.bg-neutral-900 input[type="text"]')),
-                15000
+            // Find and click Jump In with verification
+            const jumpInLink = await driver.wait(
+                until.elementLocated(By.css('a#jumpin div.bg-gray-700')), 
+                15000,
+                'Jump In button not found'
             );
+            await driver.executeScript("arguments[0].scrollIntoView(true);", jumpInLink);
+            await driver.wait(until.elementIsVisible(jumpInLink), 15000);
+            await jumpInLink.click();
+
+            // Wait for chatbot interface with multiple element checks
+            await driver.wait(until.urlContains('/Chatbot'), 15000);
+            await driver.sleep(5000); // Wait for page transition
+
+            // Look for chat container with exact classes from Chatbot.jsx
+            const chatContainer = await driver.wait(
+                until.elementLocated(By.css('.bg-gray-200.flex.h-screen.justify-center.pt-14')),
+                20000,
+                'Chat container not found'
+            );
+
+            // Find input form within chat interface
+            const inputForm = await driver.wait(
+                until.elementLocated(By.css('form.bg-neutral-900.min-w-10\\/12')),
+                15000,
+                'Input form not found'
+            );
+
+            // Find and interact with input field
+            const inputField = await inputForm.findElement(By.css('input[type="text"]'));
             await inputField.sendKeys('Create a test about the Inca Empire');
 
             // Find and click send button
             const sendButton = await driver.findElement(By.id('send'));
             await sendButton.click();
 
-            // Verify chat message appears
-            await driver.wait(async () => {
-                const messages = await driver.findElements(By.css('#message .bg-neutral-900'));
-                return messages.length > 0;
-            }, 15000, 'No chat messages found');
+            // Wait for response with longer timeout
+            await driver.sleep(7000);
+
+            // Check for message response
+            const messages = await driver.wait(
+                until.elementsLocated(By.css('#message .bg-neutral-900')),
+                20000,
+                'No chat messages found'
+            );
+            assert.ok(messages.length > 0, 'No messages appeared');
 
         } catch (error) {
             console.error('Error in chatbot test:', error);
-            // Log page source for debugging
-            const source = await driver.getPageSource();
-            console.error('Page source:', source);
+            // Take screenshot for debugging
+            const screenshot = await driver.takeScreenshot();
+            await fs.writeFile('error-screenshot.png', screenshot, 'base64');
             throw error;
         }
     });
