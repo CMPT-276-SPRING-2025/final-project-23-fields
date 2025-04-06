@@ -8,15 +8,17 @@ import assert from 'assert';
     try {
         // Setup Chrome in headless mode for CI
         const options = new Options();
-        options.addArguments('--headless=new');
+        options.addArguments('--headless');  // Simplified headless argument
         options.addArguments('--no-sandbox');
         options.addArguments('--disable-dev-shm-usage');
         options.addArguments('--disable-gpu');
         options.addArguments('--window-size=1920,1080');
-        options.addArguments('--remote-debugging-port=9222');
+        options.addArguments('--disable-software-rasterizer');
         options.addArguments('--disable-extensions');
-        options.addArguments('--enable-logging');
-        options.addArguments('--v=1');
+        options.addArguments('--ignore-certificate-errors');
+
+        // Log the Chrome version
+        console.log('Chrome options:', options);
 
         driver = await new Builder()
             .forBrowser('chrome')
