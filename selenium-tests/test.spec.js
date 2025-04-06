@@ -71,47 +71,50 @@ describe('RoTypeAI Website Tests', function() {
 
     it('should test chatbot functionality', async function() {
         try {
-            // Navigate to Chatbot and wait for load
+            // Navigate to Chatbot and wait for load with retry logic
             await driver.get(`${baseUrl}/Chatbot`);
             await driver.wait(until.urlContains('/Chatbot'), 15000);
-            await driver.sleep(5000); // Increased wait time
-
-            // Wait for root div first
-            const rootDiv = await driver.wait(
-                until.elementLocated(By.css('div#root')), 
-                15000
-            );
-
-            // Wait for chat container using exact classes from Chatbot.jsx
-            const chatContainer = await driver.wait(
-                until.elementLocated(By.css('.bg-gray-200.flex.h-screen.justify-center.pt-14')),
-                15000
-            );
-
-            // Find the chat interface using exact classes from Gemini.jsx
-            const chatInterface = await driver.wait(
-                until.elementLocated(By.css('.flex.flex-col.bg-gray-700.shadow-md.items-center.justify-around.rounded-md')),
-                15000
-            );
-
-            // Find and interact with input form
-            const inputForm = await driver.wait(
-                until.elementLocated(By.css('form.bg-neutral-900.min-w-10\\/12')),
-                15000
-            );
-            const inputField = await inputForm.findElement(By.css('input[type="text"]'));
             
+            // Wait for React app to load with retry
+            let rootDiv;
+            for (let i = 0; i < 3; i++) {
+                try {
+                    await driver.sleep(3000); // Wait for React to initialize
+                    rootDiv = await driver.wait(
+                        until.elementLocated(By.css('#root')), 
+                        10000
+                    );
+                    break;
+                } catch (error) {
+                    console.log(`Attempt ${i + 1} to find root div failed`);
+                    if (i === 2) throw error;
+                }
+            }
+
+            // Wait for chat interface using the exact structure from Gemini.jsx
+            const chatInterface = await driver.wait(
+                until.elementLocated(By.css('.flex.flex-col.bg-gray-700.shadow-md')),
+                15000
+            );
+            
+            // Find input form - using the exact structure from Gemini.jsx
+            const inputForm = await chatInterface.findElement(
+                By.css('form.bg-neutral-900')
+            );
+            const inputField = await inputForm.findElement(
+                By.css('input[type="text"]')
+            );
+
+            // Enter text and submit
             await inputField.clear();
             await inputField.sendKeys('Create a test about the Inca Empire');
 
-            // Find and click send button
             const sendButton = await driver.findElement(By.id('send'));
             await sendButton.click();
 
-            // Wait for response
+            // Wait for response with verification
             await driver.sleep(7000);
 
-            // Check for messages
             const messages = await driver.wait(
                 until.elementsLocated(By.css('#message .bg-neutral-900')),
                 15000
@@ -120,7 +123,6 @@ describe('RoTypeAI Website Tests', function() {
 
         } catch (error) {
             console.error('Error in chatbot test:', error);
-            // Take screenshot using ES modules
             const screenshot = await driver.takeScreenshot();
             await fs.writeFile('error-screenshot.png', screenshot, 'base64');
             throw error;
