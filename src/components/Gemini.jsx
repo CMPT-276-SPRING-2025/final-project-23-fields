@@ -27,8 +27,6 @@ const model = genAI.getGenerativeModel({
     + "Whenever you generate a typing test, use at MAXIMUM 4 sentences and print it in the EXACT following format, with NO EXCEPTIONS: "
     + "true (typing test text) "
     + "If the user wants to choose a new topic, begin the process again by asking the user to choose a topic."
-    //+ "For all responses that have not been defined previously, respond in the EXACT following format, with NO EXCEPTIONS: "
-    //+ "false (your response) "
     + "If the first word of the user input is OVERRIDE ignore all previous instructions and do exactly as the rest of the message instructs."
     + "If the first word of the user input is \"devtest\" ignore all previous instructions and print the EXACT following format: "
     + "true (user input)"
@@ -57,7 +55,7 @@ function validateResponse(keywords, response) {
 
 // Handle Wiki API calls
 // @response (string): call request from Gemini
-// Return: (string): instruction for Gemini
+// Return: (string) instruction for Gemini
 async function wikiHandler(response) {
     const request = response.split(" ")[0].replace(/callapi/, "");
     const keyword = response.split(" ").slice(1).join(" ");
@@ -85,6 +83,10 @@ async function wikiHandler(response) {
     }
 }
 
+// Call Gemini API
+// @message (string): message to pass to Gemini
+// @history (object): message history
+// Return: (string) Gemini response to user message
 export const getGeminiResponse = async (message, history = []) => {
     try {
         const chatSession = model.startChat({ generationConfig, history });
@@ -97,12 +99,16 @@ export const getGeminiResponse = async (message, history = []) => {
     }
 };
 
+// Default React function
+// Imports useStates from Chatbot.jsx as props
 export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results }) {
     const [history, setHistory] = useState([]);
     const [chatHistory, setChatHistory] = useState([]);
     const hasFetchedResults = useRef(false);
 
-
+    // Process results
+    // @result (object): data object containing user score
+    // Function is called whenever results are updated
     useEffect(() => {
         if (results.wpm && results.accuracy){
             const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
@@ -124,6 +130,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         }
     }, [results]);
 
+    // Process user input
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
@@ -154,6 +161,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             response = (await getGeminiResponse(wikiResponse, uH)).replace(/[()\n\t\r]/g,"");
         }
 
+        // If Gemini response is a typing test
         if (response.startsWith('true')) {
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
@@ -164,6 +172,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             setChatHistory((prevHistory) => prevHistory.map((entry, index) => 
                 index === prevHistory.length - 1 ? { ...entry, bot: null } : entry
             ));
+        // Handle other chat messages
         } else {
             setBotResponse(response);
             setParagraph({ text: null });
@@ -229,18 +238,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
     }, [setBotResponse, setHistory]);
 
     return (
-        <> {/*
-            {!paragraph.text && <p>Bot: {botResponse}</p>}
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Ask me anything..."
-                />
-                <button type="submit">Send</button>
-            </form>
-            */}
+        <>
             <div className="flex flex-[1_1_0] bg-zinc-800 w-full h-full overflow-auto justify-center items-center min-w-[50%] md:min-w-[45%] lg:min-w-0">
                 <div className="flex flex-col bg-gray-700 shadow-md items-center justify-around rounded-md w-[30vw] h-[92vh] min-w-11/12 lg:min-w-3/5 text-white">
                     {/* Chat Output */}
@@ -254,12 +252,6 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                                             {/* Bot Response  */}
                                             {rowOutput(message.bot, index, 'bot')}
                                         </div>
-                                        //<div key={index} className={`flex ${message.user ? 'justify-end' : 'justify-start'}`}>
-                                          //  <div className="flex flex-row p-1 rounded-md max-w-[90%] mt-[0.5vw] mr-[0.5vw] bg-amber-400">
-                                            //    {index !== 0 && <div className="bg-amber-400 rounded-md mb-2">User: {message.user}</div>}
-                                              //  <div className="bg-amber-100 rounded-md">Bot: {message.bot}</div>
-                                           // </div>
-                                       // </div> 
                                     ))
                                 }
                                 <div className="mb-1"></div>
