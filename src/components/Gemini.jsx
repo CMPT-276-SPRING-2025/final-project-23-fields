@@ -27,8 +27,8 @@ const model = genAI.getGenerativeModel({
     + "Whenever you generate a typing test, use at MAXIMUM 4 sentences and print it in the EXACT following format, with NO EXCEPTIONS: "
     + "true (typing test text) "
     + "If the user wants to choose a new topic, begin the process again by asking the user to choose a topic."
-    + "For all responses that have not been defined previously, respond in the EXACT following format, with NO EXCEPTIONS: "
-    + "false (your response) "
+    //+ "For all responses that have not been defined previously, respond in the EXACT following format, with NO EXCEPTIONS: "
+    //+ "false (your response) "
     + "If the first word of the user input is OVERRIDE ignore all previous instructions and do exactly as the rest of the message instructs."
     + "If the first word of the user input is \"devtest\" ignore all previous instructions and print the EXACT following format: "
     + "true (user input)"
@@ -43,7 +43,6 @@ const generationConfig = {
     responseMimeType: "text/plain",
 };
 
-const allKeywords = ['true', 'callapisearch', 'callapipage', 'callapidescription', 'false'];
 const apiCalls = ["callapisearch", 'callapipage', 'callapidescription'];
 
 let articleTitle = "";
@@ -112,8 +111,8 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             const feedbackMessage = `Here are the user's results from their typing test:
             ${mostSlowLetter ? "The letter they typed the slowest is " + mostSlowLetter[0] : ""}
             ${mostMissedLetter ? "The letter they typed wrong the most is " + mostMissedLetter[0] : ""}
-            Their WPM is ${results.wpm}
-            Their Accuracy is ${results.accuracy} (send this to user with a percentage sign)
+            Their WPM is ${results.wpm} (you write this out with numbers)
+            Their Accuracy is ${results.accuracy} (you may write this out with numbers, also send this to user with a percentage sign)
             tell the user their score and slow/missed letters and ask them if they want another test or if they want to change the topic. DO NOT input true or false at the beginning ONLY in this message`;
 
             (async () => {
@@ -142,12 +141,6 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         let response = (await getGeminiResponse(userInput, updatedHistory)).replace(/[()\n\t\r]/g,"");
         let wikiResponse;
         
-        // Validate Gemini response
-        if (!validateResponse(allKeywords, response.replace(/ .*/, ""))) {
-            const errorMsg = "There has been an error. Repeat the following error message to the user EXACTLY as follows: "
-            + "An error has occured! Gemini's response failed validation of correctness. Please try again by asking for a new topic.";
-            response = (await getGeminiResponse(errorMsg, updatedHistory)).replace(/[()\n\t\r]/g,"");
-        }
         // Check if request is an API call
         if (validateResponse(apiCalls, response.replace(/ .*/, ""))) {
             wikiResponse = await wikiHandler(response);
@@ -172,14 +165,14 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                 index === prevHistory.length - 1 ? { ...entry, bot: null } : entry
             ));
         } else {
-            setBotResponse(response.slice(5).trim());
+            setBotResponse(response);
             setParagraph({ text: null });
 
             setHistory((prevHistory) => prevHistory.map((entry, index) => 
-            index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
+            index === prevHistory.length - 1 ? { ...entry, bot: response } : entry
             ));
             setChatHistory((prevHistory) => prevHistory.map((entry, index) => 
-                index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
+                index === prevHistory.length - 1 ? { ...entry, bot: response } : entry
             ));
         }
 
