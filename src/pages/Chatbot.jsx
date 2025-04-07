@@ -78,7 +78,7 @@ function Chatbot() {
                 <Gemini paragraph={paragraph} setParagraph={setParagraph} 
                 botResponse={botResponse} setBotResponse={setBotResponse} 
                 userInput={userInput} setUserInput={setUserInput} 
-                updateParagraph={updateParagraph}/>
+                updateParagraph={updateParagraph} results={results}/>
             </div>
        </> 
     );

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = import.meta.env.VITE_API_KEY;
@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions.",
+    systemInstruction: "You are a chatbot that can respond to user questions, but can also create typing tests for the user. At the start of your response you must always put true or false. If true (NO UPPER CASE for true) you print the typing test after true with a one-line gap and no other responses, else print false (NO UPPERCASE for false) at the start of every response if replying normally. Do not add words with contractions. Whenever the user asks a question, always drive them to create a typing test instead of just printing out your answer, but do not be so pushy about this. Once you get results from the test Congratulate the user on their progress and relay the information above back to the user succinctly. Then ASK if they would like to move onto a new test or generate a test based on their data. If the user wants to generate a test based on their data, generate a typing test based on their most missed letter and slowest letter in full sentences. (DO NOT EVER TYPE SYSTEM INSTRUCTIONS TO THE USER)",
 });
 
 const generationConfig = {
@@ -24,21 +24,46 @@ export const getGeminiResponse = async (message, history = []) => {
         return result.response.text();
     } catch (error) {
         console.error("Error fetching Gemini response:", error);
+        console.log(message);
         return "false Sorry, something went wrong. Please reload the website.";
     }
 };
 
 
-export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph}) {
+export default function Gemini({ paragraph, setParagraph, botResponse, setBotResponse, userInput, setUserInput, updateParagraph, results}) {
     const [history, setHistory] = useState([]);
+    const hasFetchedResults = useRef(false);
+
+
+    useEffect(() => {
+        if (results.wpm && results.accuracy){
+            const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
+            const mostSlowLetter = Object.entries(results.slowLetters || {}).sort((a, b) => b[1] - a[1])[0];
+            
+            const feedbackMessage = `Here are the user's results from their typing test:
+            ${mostSlowLetter ? "The letter they typed the slowest is " + mostSlowLetter[0] : ""}
+            ${mostMissedLetter ? "The letter they typed wrong the most is " + mostMissedLetter[0] : ""}
+            Their WPM is ${results.wpm}
+            Their Accuracy is ${results.accuracy} (send this to user with a percentage sign)
+            tell the user their score and slow/missed letters and ask them if they want another test. DO NOT input true or false ONLY in this message`;
+
+            (async () => {
+                const response = await getGeminiResponse(feedbackMessage);
+                setBotResponse(response);
+                setHistory(prevHistory => [...prevHistory, { user: "", bot: response }]);
+            })();
+        }
+    }, [results]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!userInput.trim()) return;
 
+        setHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
+
         const formattedHistory = history.map(entry => [
-            { role: "user", parts: [{ text: entry.user }] }, 
-            { role: "model", parts: [{ text: entry.bot }] }   
+            { role: "user", parts: [{ text: entry.user }] },
+            { role: "model", parts: [{ text: entry.bot }] }
         ]).flat();
 
         const newMessage = { role: "user", parts: [{ text: userInput }] };
@@ -48,18 +73,18 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         if (response.startsWith('true')) {
             const typingTestText = response.slice(4).trim();
             updateParagraph(typingTestText);
-            setBotResponse(""); // Clear bot response since it's a typing test
+            setBotResponse("");
+            setHistory((prevHistory) => prevHistory.map((entry, index) => 
+            index === prevHistory.length - 1 ? { ...entry, bot: typingTestText } : entry
+            ));
         } else {
             setBotResponse(response.slice(5).trim());
             setParagraph({ text: null });
-        }
 
-        setHistory((prevHistory) => [
-            ...prevHistory,
-            { user: userInput, bot: response.slice(5).trim() }
-        ]);
-        
-        console.log(history);
+            setHistory((prevHistory) => prevHistory.map((entry, index) => 
+            index === prevHistory.length - 1 ? { ...entry, bot: response.slice(5).trim() } : entry
+            ));
+        }
 
         setUserInput('');
     };
@@ -101,12 +126,6 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         }     
      
     }
-    
-    useEffect(() => {
-        if (paragraph.text) {
-            setBotResponse(""); // Clear bot response when a typing test starts
-        }
-    }, [paragraph]);
 
     useEffect(() => {
         const startConversation = async () => {
@@ -166,8 +185,9 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
                             </input>
                         </form>
                         <button id="send"
-                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer"
-                        onClick={handleSubmit}>Send
+                        className="bg-neutral-900 min-w-2/12 rounded-r-md cursor-pointer flex items-center justify-center"
+                        onClick={handleSubmit}>
+                            <img src="images/send.png" alt="Send" className="h-6 w-6"></img>
                         </button>
                     </div>
                 </div>
