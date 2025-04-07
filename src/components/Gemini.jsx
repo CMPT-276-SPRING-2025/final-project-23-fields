@@ -110,7 +110,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
     // @result (object): data object containing user score
     // Function is called whenever results are updated
     useEffect(() => {
-        if (results.wpm && results.accuracy){
+        if (results.wpm && results.accuracy || results.wpm === 0){
             const mostMissedLetter = Object.entries(results.missedLetters || {}).sort((a, b) => b[1] - a[1])[0];
             const mostSlowLetter = Object.entries(results.slowLetters || {}).sort((a, b) => b[1] - a[1])[0];
             
