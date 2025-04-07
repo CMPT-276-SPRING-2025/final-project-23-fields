@@ -114,7 +114,7 @@ describe('RoTypeAI Website Tests', function() {
 
             // Find and interact with input field
             const inputField = await inputForm.findElement(By.css('input[type="text"]'));
-            await inputField.sendKeys('Create a test about the Inca Empire');
+            await inputField.sendKeys('devoverride true the quick brown fox jumps over the lazy dog');
 
             // Find and click send button
             const sendButton = await driver.findElement(By.id('send'));
@@ -179,7 +179,7 @@ describe('RoTypeAI Website Tests', function() {
             const inputField = await inputForm.findElement(By.css('input[type="text"]'));
             await driver.wait(until.elementIsEnabled(inputField), 15000);
             await inputField.clear();
-            await inputField.sendKeys('Create a short typing test about cats');
+            await inputField.sendKeys('devoverride true the quick brown fox jumps over the lazy dog');
             
             const sendButton = await driver.findElement(By.id('send'));
             await driver.wait(until.elementIsEnabled(sendButton), 15000);
