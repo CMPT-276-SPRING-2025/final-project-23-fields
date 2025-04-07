@@ -1,8 +1,10 @@
+// Error codes
 const errorCode = {
     1: {missing: true, extract: "Improper search query. This is likely a formatting error resulting from Gemini!"},
     2: {missing: true, extract: "Wiki Page does not exist!"}
 }
 
+// API call parameter constructor
 class queryParams {
     constructor(request, keyword) {
         this.action = "query";
@@ -21,11 +23,19 @@ class queryParams {
             this.titles = keyword;
             this.explaintext = "1";
             this.redirects = "1";
+        // Construct parameters for fetching page description
             if (request === "description") this.exsentences = "3";
         }        
     }
 }
 
+// Internal function used to call Wikipedia API
+// @request (string): request type
+// @keyword (string): keyword
+// @searchUrl (string): API parameters
+// Return: (object)
+//      @missing (boolean): was there an error?
+//      @extract (string): API response
 // Uses newly created url to fetch the article text, filtering it, and change useState articleText
 const getArticle = async (request, keyword, searchUrl) => {
     try {
@@ -64,6 +74,12 @@ const getArticle = async (request, keyword, searchUrl) => {
     }
 }
 
+// Export function used to call Wikipedia API
+// @request (string): request type
+// @keyword (string): keyword
+// Return: (object)
+//      @missing (boolean): was there an error?
+//      @extract (string): API response
 export async function callWikipediaAPI(request, keyword) {
     if (!request || ! keyword || !["search", "page", "description"].includes(request)) return errorCode[1];
     const param = new queryParams(request, keyword);
