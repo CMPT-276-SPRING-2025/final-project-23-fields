@@ -3,4 +3,13 @@
 # RoTypeAI
 Final project for CMPT276 Spring 2025, group 23 Fields
 
-## Description
+## Step-by-step Instructions for local deployment
+1. git clone git@github.com:CMPT-276-SPRING-2025/final-project-23-fields.git
+2. npm install
+3. npm run build
+4. npm run preview
+
+## Links
+Project Website: 
+Reports: 
+Videos: 
