@@ -14,9 +14,9 @@ describe('RoTypeAI Website Tests', function() {
         console.log('Testing URL:', baseUrl);
 
         const options = new Options();
-        options.addArguments('--headless');
-        options.addArguments('--no-sandbox');
-        options.addArguments('--disable-dev-shm-usage');
+        //options.addArguments('--headless');
+        //options.addArguments('--no-sandbox');
+        //options.addArguments('--disable-dev-shm-usage');
         options.addArguments('--window-size=1920,1080');
 
         driver = await new Builder()
@@ -139,42 +139,72 @@ describe('RoTypeAI Website Tests', function() {
 
     it('should test typing functionality', async function() {
         try { 
-            // Navigate to chatbot page
+            // Navigate to chatbot page and wait for load
             await driver.get(`${baseUrl}/Chatbot`);
-            await driver.sleep(3000);
-
-            // Request a typing test
-            const inputForm = await driver.wait(
-                until.elementLocated(By.css('form.bg-neutral-900')),
-                15000,
-                'Input form not found'
+            
+            // Wait for chat container first
+            await driver.wait(
+                until.elementLocated(By.css('.bg-gray-200.flex.h-screen.justify-center.pt-14')),
+                30000,
+                'Chat container not found'
             );
+
+            // Wait for initial load with retry mechanism
+            let inputForm;
+            const maxRetries = 3;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    inputForm = await driver.wait(
+                        until.elementLocated(By.css('form.bg-neutral-900')),
+                        20000,
+                        'Input form not found'
+                    );
+                    break;
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    console.log(`Retry ${i + 1} finding input form...`);
+                    await driver.sleep(5000);
+                }
+            }
+
+            // Take screenshot if form is found for debugging
+            await driver.takeScreenshot().then(
+                data => fs.writeFile('form-found.png', data, 'base64')
+            );
+
             const inputField = await inputForm.findElement(By.css('input[type="text"]'));
+            await driver.wait(until.elementIsEnabled(inputField), 15000);
+            await inputField.clear();
             await inputField.sendKeys('Create a short typing test about cats');
             
             const sendButton = await driver.findElement(By.id('send'));
+            await driver.wait(until.elementIsEnabled(sendButton), 15000);
             await sendButton.click();
             
-            // Wait for typing test to appear
-            await driver.sleep(5000);
-            
-            // Find and click the typing test area
-            const typingTest = await driver.wait(
-                until.elementLocated(By.id('typingtest')),
-                15000,
-                'Typing test area not found'
-            );
+            // Wait for typing test with retry
+            let typingTest;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    typingTest = await driver.wait(
+                        until.elementLocated(By.id('typingtest')),
+                        20000,
+                        'Typing test area not found'
+                    );
+                    break;
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    console.log(`Retry ${i + 1} finding typing test...`);
+                    await driver.sleep(5000);
+                }
+            }
+
             await typingTest.click();
 
-            // Get all words in the test
+            // Rest of typing logic remains the same
             const words = await driver.findElements(By.css('.word'));
             
-            // Type each word
             for (const word of words) {
-                // Get letters of current word
                 const letters = await word.findElements(By.css('.letter'));
-                
-                // Type each letter in the word
                 for (const letter of letters) {
                     const letterText = await letter.getText();
                     await driver.actions()
@@ -183,7 +213,6 @@ describe('RoTypeAI Website Tests', function() {
                     await driver.sleep(100);
                 }
                 
-                // Add space after each word (except the last word)
                 if (words.indexOf(word) < words.length - 1) {
                     await driver.actions()
                         .sendKeys(' ')
@@ -200,6 +229,10 @@ describe('RoTypeAI Website Tests', function() {
 
         } catch (error) {
             console.error('Error in typing test:', error);
+            // Take screenshot on failure
+            await driver.takeScreenshot().then(
+                data => fs.writeFile('typing-test-error.png', data, 'base64')
+            );
             throw error;
         }
     });
