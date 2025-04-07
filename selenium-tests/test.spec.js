@@ -40,7 +40,7 @@ describe('RoTypeAI Website Tests', function() {
 
         // Navigate to tutorial page
         const howToUseButton = await driver.wait(
-            until.elementLocated(By.id('howtouse')), 
+            until.elementLocated(By.id('howtouse')),  
             15000
         );
         const jumpInButton = await driver.wait(
