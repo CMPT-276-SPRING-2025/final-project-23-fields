@@ -29,6 +29,8 @@ jobs:
       - name: Build
         run: npm run build
 
+      
+
       - name: Deploy to DigitalOcean
         uses: digitalocean/action-doctl@v2
         with:
