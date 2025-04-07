@@ -156,13 +156,15 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         analytics.correctLetters++;
       }
       // Move onto next word
+      removeClass(currentWord, 'current');
+      if (currentLetter) {
+        removeClass(currentLetter, 'current');
+      }
       if (currentWord.nextSibling) {
-        removeClass(currentWord, 'current');
         addClass(currentWord.nextSibling, 'current');
-        if (currentLetter) {
-          removeClass(currentLetter, 'current');
-        }
         addClass(currentWord.nextSibling.firstChild, 'current');
+      } else {
+        endTest();
       }
     // Condition: Backspace key pressed
     } else if(isBackspace) {
@@ -218,8 +220,10 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     const nextLetter = document.querySelector('.letter.current');
     const nextWord = document.querySelector('.word.current');
     const cursor = document.getElementById('cursor');
-    cursor.style.top = `${(nextLetter || nextWord).getBoundingClientRect().top}px`;
-    cursor.style.left = `${(nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right']}px`;
+    if (nextLetter || nextWord) {
+      cursor.style.top = `${(nextLetter || nextWord).getBoundingClientRect().top}px`;
+      cursor.style.left = `${(nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right']}px`;
+    }
   };
 
   function addClass(element, name) {
