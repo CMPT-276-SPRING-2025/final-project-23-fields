@@ -10,7 +10,7 @@ describe('RoTypeAI Website Tests', function() {
     this.timeout(60000);
 
     before(async function() {
-        baseUrl = process.env.STAGING_URL || 'http://localhost:5173';
+        baseUrl = process.env.STAGING_URL || 'https://rotype-staging-87h9l.ondigitalocean.app/';
         console.log('Testing URL:', baseUrl);
 
         const options = new Options();
@@ -95,7 +95,7 @@ describe('RoTypeAI Website Tests', function() {
             await jumpInLink.click();
 
             // Wait for chatbot interface with multiple element checks
-            await driver.wait(until.urlContains('/Chatbot'), 15000);
+            await driver.wait(until.urlContains('Chatbot'), 15000);
             await driver.sleep(5000); // Wait for page transition
 
             // Look for chat container with exact classes from Chatbot.jsx
@@ -139,8 +139,12 @@ describe('RoTypeAI Website Tests', function() {
 
     it('should test typing functionality', async function() {
         try { 
-            // Navigate to chatbot page and wait for load
-            await driver.get(`${baseUrl}/Chatbot`);
+            // Fix URL construction to avoid double slash
+            const chatbotUrl = new URL('/Chatbot', baseUrl).toString();
+            await driver.get(chatbotUrl);
+            
+            // Log URL for debugging
+            console.log('Navigating to:', chatbotUrl);
             
             // Wait for chat container first
             await driver.wait(
