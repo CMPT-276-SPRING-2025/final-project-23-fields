@@ -38,6 +38,7 @@ describe('RoTypeAI Website Tests', function() {
         const title = await driver.getTitle();
         assert.equal(title, 'RoTypeAI');
 
+        // Navigate to tutorial page
         const howToUseButton = await driver.wait(
             until.elementLocated(By.id('howtouse')), 
             15000
@@ -132,6 +133,73 @@ describe('RoTypeAI Website Tests', function() {
 
         } catch (error) {
             console.error('Error in chatbot test:', error);
+            throw error;
+        }
+    });
+
+    it('should test typing functionality', async function() {
+        try {
+            // Navigate to chatbot page
+            await driver.get(`${baseUrl}/Chatbot`);
+            await driver.sleep(3000);
+
+            // Request a typing test
+            const inputForm = await driver.wait(
+                until.elementLocated(By.css('form.bg-neutral-900')),
+                15000,
+                'Input form not found'
+            );
+            const inputField = await inputForm.findElement(By.css('input[type="text"]'));
+            await inputField.sendKeys('Create a short typing test about cats');
+            
+            const sendButton = await driver.findElement(By.id('send'));
+            await sendButton.click();
+            
+            // Wait for typing test to appear
+            await driver.sleep(5000);
+            
+            // Find and click the typing test area
+            const typingTest = await driver.wait(
+                until.elementLocated(By.id('typingtest')),
+                15000,
+                'Typing test area not found'
+            );
+            await typingTest.click();
+
+            // Get all words in the test
+            const words = await driver.findElements(By.css('.word'));
+            
+            // Type each word
+            for (const word of words) {
+                // Get letters of current word
+                const letters = await word.findElements(By.css('.letter'));
+                
+                // Type each letter in the word
+                for (const letter of letters) {
+                    const letterText = await letter.getText();
+                    await driver.actions()
+                        .sendKeys(letterText)
+                        .perform();
+                    await driver.sleep(100);
+                }
+                
+                // Add space after each word (except the last word)
+                if (words.indexOf(word) < words.length - 1) {
+                    await driver.actions()
+                        .sendKeys(' ')
+                        .perform();
+                    await driver.sleep(100);
+                }
+            }
+
+            // Verify completion
+            const completedWords = await driver.findElements(
+                By.css('.word:not(.current) .letter.correct')
+            );
+            assert.ok(completedWords.length > 0, 'No words were typed correctly');
+
+        } catch (error) {
+            console.error('Error in typing test:', error);
             throw error;
         }
     });

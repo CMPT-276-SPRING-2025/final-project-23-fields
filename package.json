@@ -2,7 +2,7 @@
   "name": "rotypeai",
   "private": true,
   "version": "0.0.0",
-    "type": "module",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,7 +20,6 @@
     "selenium-webdriver": "^4.31.0",
     "tailwindcss": "^4.0.14"
   },
-"mocha": "^10.2.0",
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/react": "^19.0.10",
