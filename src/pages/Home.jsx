@@ -1,5 +1,5 @@
 import Header from '../components/Header.jsx'
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 
 function Home() {
     return(
@@ -12,7 +12,7 @@ function Home() {
               </div>
               <div className="flex flex-col flex-wrap items-center">
                 <div className="mt-35 h-40 grid sm:grid-cols-[275px_275px] grid-cols-1 gap-y-5 bg-zinc-800 sm:gap-x-25">
-                      <Link to="/Tutorial" className=" cursor-pointer">
+                      <Link to="/Tutorial" id="howtouse" className=" cursor-pointer">
                         <div className="bg-gray-700 rounded-md text-white font-jost shadow-md flex flex-col justify-center h-full p-8">
                             <div className="text-3xl mb-8">
                             How to Use
@@ -22,7 +22,7 @@ function Home() {
                             </div>
                         </div>
                       </Link>
-                      <Link to="/Chatbot" className=" cursor-pointer">
+                      <Link to="/Chatbot" id="jumpin" className=" cursor-pointer">
                         <div className="text-white font-jost bg-gray-700 flex flex-col justify-center h-full shadow-md rounded-md p-8"> 
                             <div className="text-3xl mb-8">
                               Jump In

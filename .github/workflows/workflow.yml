@@ -1,0 +1,112 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches: [testing]
+  pull_request:
+    branches: [testing]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgbm1
+          npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      - name: Deploy to DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Create deployment and wait
+        id: deployment
+        run: |
+          echo "Creating deployment..."
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+
+          # Get the actual app URL from doctl (without https://)
+          APP_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID }} --format DefaultIngress --no-header | tr -d '[:space:]')
+          if [ -z "$APP_URL" ]; then
+            echo "Error: Could not get app URL"
+            exit 1
+          fi
+
+          # Remove https:// if it exists in the APP_URL
+          APP_URL="${APP_URL#https://}"
+
+          # Set the URL for subsequent steps with single https://
+          STAGING_URL="https://$APP_URL"
+          echo "Got URL: $STAGING_URL"
+          echo "STAGING_URL=$STAGING_URL" >> $GITHUB_ENV
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      - name: Install ChromeDriver
+        run: |
+          version=$(google-chrome --version | cut -d ' ' -f 3)
+          wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/$version/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          rm -rf chromedriver-linux64*
+
+      - name: Run Selenium tests
+        env:
+          STAGING_URL: ${{ env.STAGING_URL }}
+        run: |
+          # Start services
+          Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
+          export DISPLAY=:99
+          chromedriver --port=4444 &
+          sleep 5
+
+          # Debug URL
+          echo "Testing against: $STAGING_URL"
+          curl -v "$STAGING_URL" || echo "URL not accessible"
+
+          # Run tests
+          npm run test
+
+      - name: Deploy to Production
+        if: success() # Only runs if all previous steps succeeded
+        id: prod-deployment
+        run: |
+          echo "Creating production deployment..."
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID_MAIN }} --wait
+
+          # Get the production app URL
+          PROD_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID_MAIN }} --format DefaultIngress --no-header | tr -d '[:space:]')
+          if [ -z "$PROD_URL" ]; then
+            echo "Error: Could not get production app URL"
+            exit 1
+          fi
+
+          # Remove https:// if it exists
+          PROD_URL="${PROD_URL#https://}"
+
+          # Set the URL as environment variable
+          echo "Production site deployed to: https://$PROD_URL"
+          echo "PROD_URL=https://$PROD_URL" >> $GITHUB_ENV
