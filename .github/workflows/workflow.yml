@@ -29,7 +29,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      
+      - name: Run Unit Tests
+        run: npm run test:unit
 
       - name: Deploy to DigitalOcean
         uses: digitalocean/action-doctl@v2
