@@ -138,7 +138,7 @@ describe('RoTypeAI Website Tests', function() {
     });
 
     it('should test typing functionality', async function() {
-        try {
+        try { 
             // Navigate to chatbot page
             await driver.get(`${baseUrl}/Chatbot`);
             await driver.sleep(3000);
