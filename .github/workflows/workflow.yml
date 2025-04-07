@@ -75,7 +75,7 @@ jobs:
 
       - name: Run Selenium tests
         env:
-          STAGING_URL: ${{ env.STAGING_URL }} # Use the URL from previous step instead of constructing a new one
+          STAGING_URL: ${{ env.STAGING_URL }}
         run: |
           # Start services
           Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & 
@@ -89,3 +89,24 @@ jobs:
 
           # Run tests
           npm run test
+
+      - name: Deploy to Production
+        if: success() # Only runs if all previous steps succeeded
+        id: prod-deployment
+        run: |
+          echo "Creating production deployment..."
+          doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID_MAIN }} --wait
+
+          # Get the production app URL
+          PROD_URL=$(doctl apps get ${{ secrets.DIGITALOCEAN_APP_ID_MAIN }} --format DefaultIngress --no-header | tr -d '[:space:]')
+          if [ -z "$PROD_URL" ]; then
+            echo "Error: Could not get production app URL"
+            exit 1
+          fi
+
+          # Remove https:// if it exists
+          PROD_URL="${PROD_URL#https://}"
+
+          # Set the URL as environment variable
+          echo "Production site deployed to: https://$PROD_URL"
+          echo "PROD_URL=https://$PROD_URL" >> $GITHUB_ENV

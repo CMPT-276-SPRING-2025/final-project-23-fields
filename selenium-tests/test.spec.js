@@ -96,7 +96,7 @@ describe('RoTypeAI Website Tests', function() {
 
             // Wait for chatbot interface with multiple element checks
             await driver.wait(until.urlContains('Chatbot'), 15000);
-            await driver.sleep(5000); // Wait for page transition
+            await driver.sleep(5000); 
 
             // Look for chat container with exact classes from Chatbot.jsx
             const chatContainer = await driver.wait(
