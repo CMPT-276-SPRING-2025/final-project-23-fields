@@ -10,27 +10,27 @@ function Tutorial() {
 
     const Images = [
         {
-            url: "./src/assets/images/tut1.png",
+            url: "/images/tut1.png",
             alt: "Image1"
         },
         {
-            url: "./src/assets/images/tut2.png",
+            url: "/images/tut2.png",
             alt: "Image2"
         },
         {
-            url: "./src/assets/images/tut3.png",
+            url: "/images/tut3.png",
             alt: "Image3"
         },
         {
-            url: "./src/assets/images/tut4.png",
+            url: "/images/tut4.png",
             alt: "Image4"
         },
         {
-            url: "./src/assets/images/tut5.png",
+            url: "/images/tut5.png",
             alt: "Image5"
         },
         {
-            url: "./src/assets/images/tut6.png",
+            url: "/images/tut6.png",
             alt: "Image6"
         },
     ];
@@ -47,7 +47,7 @@ function Tutorial() {
     const imageLast = () => {
         // If its the first image, goes to Home, else moves to previous
         if (image === 0) {
-            navigate('/');
+            navigate('/Home');
         }
         else {
             setImage(image - 1);
@@ -83,7 +83,7 @@ function Tutorial() {
                                 </div>
                             </button>
                             <button className="cursor-pointer" onClick={imageNext}>
-                                <div className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
+                                <div id="next" data-testid="next-button" className="bg-gray-700 shadow-md rounded-md text-white text-xl font-inter flex items-center justify-center h-full text-3xl">
                                     Next
                                 </div>
                             </button>

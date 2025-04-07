@@ -156,13 +156,15 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         analytics.correctLetters++;
       }
       // Move onto next word
+      removeClass(currentWord, 'current');
+      if (currentLetter) {
+        removeClass(currentLetter, 'current');
+      }
       if (currentWord.nextSibling) {
-        removeClass(currentWord, 'current');
         addClass(currentWord.nextSibling, 'current');
-        if (currentLetter) {
-          removeClass(currentLetter, 'current');
-        }
         addClass(currentWord.nextSibling.firstChild, 'current');
+      } else {
+        endTest();
       }
     // Condition: Backspace key pressed
     } else if(isBackspace) {
@@ -218,8 +220,10 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     const nextLetter = document.querySelector('.letter.current');
     const nextWord = document.querySelector('.word.current');
     const cursor = document.getElementById('cursor');
-    cursor.style.top = `${(nextLetter || nextWord).getBoundingClientRect().top}px`;
-    cursor.style.left = `${(nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right']}px`;
+    if (nextLetter || nextWord) {
+      cursor.style.top = `${(nextLetter || nextWord).getBoundingClientRect().top}px`;
+      cursor.style.left = `${(nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right']}px`;
+    }
   };
 
   function addClass(element, name) {
@@ -303,9 +307,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
               <div className="bg-gray-700 lg:w-[50vw] h-[40vh] w-full  items-center justify-center flex rounded-md shadow-md">
                 <div id="typingtestcontainer" className="hidden">
                   <div id="typingtestheader">
-                    <div id="typingtimer" className="text-center font-inter text-white">0</div>
+                    <div id="typingtimer" className="text-center">{typingTime / 1000}</div>
                   </div>
-                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden bg-gray-700 rounded-md focus:bg-gray-700">
+                  <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-[25rem] overflow-hidden rounded-md">
                     <div id="words" className="p-5 text-zinc-400 font-inter blur-sm group-focus:blur-none"></div>
                     <div id="cursor" className="absolute blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-blue-600"></div>
                     <div id="focus-error" className="text-white font-inter absolute justify-center flex text-center items-center inset-0 select-none group-focus:hidden">Click here to resume</div>
