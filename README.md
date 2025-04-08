@@ -5,9 +5,11 @@ Final project for CMPT276 Spring 2025, group 23 Fields
 
 ## Step-by-step Instructions for local deployment
 1. git clone git@github.com:CMPT-276-SPRING-2025/final-project-23-fields.git
-2. npm install
-3. npm run build
-4. npm run preview
+2. create .env file at root of repository
+3. add VITE_API_KEY=[APIKEY] in .env
+4. npm install
+5. npm run build
+6. npm run preview
 
 ## Links
 Project Website: 
