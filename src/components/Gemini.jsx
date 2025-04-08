@@ -63,14 +63,17 @@ async function wikiHandler(response) {
     const keyword = response.split(" ").slice(1).join(" ");
     const wikiResponse = await callWikipediaAPI(request, keyword);
 
+    // If API returns a error
     if (wikiResponse.missing) {
         return "There has been an error. Apologize and inform the user that an error has occured, "
         + "and repeat the following error message back to the user. "
         + "Then ask the user to try again by choosing another topic. Error message: "
         + wikiResponse.extract;
+    // If request type is search
     } else if (request === "search") {
         articleTitle = wikiResponse.extract;
         return await wikiHandler(`callapidescription ${wikiResponse.extract}`);
+    // If request type is description
     } else if (request === "description") {
         return "Tell the user you will provide a brief summary of the topic and provide a short 1 sentence summary of the topic using the description given below, "
         + "and ask the user if they are ready to start their typing test. "
@@ -78,6 +81,7 @@ async function wikiHandler(response) {
         + "\"callapipage " + articleTitle + "\"."
         + "Description: "
         + wikiResponse.extract;
+    // If request type is page
     } else if (request === "page") {
         const text = wikiResponse.extract.slice(0, (wikiResponse.extract.length < 300) ? wikiResponse.extract.length : 300 );
         return "Generate a typing test of MAXIMUM 4 sentences using the following words: "
@@ -149,6 +153,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
         e.preventDefault();
         if (!userInput.trim()) return;
 
+        // Update chat history
         setHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
         setChatHistory((prevHistory) => [...prevHistory, { user: userInput, bot: "..." }]);
 
@@ -157,6 +162,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             { role: "model", parts: [{ text: entry.bot }] }
         ]).flat();
 
+        // Send message to Gemini
         const newMessage = { role: "user", parts: [{ text: userInput }] };
         const updatedHistory = [...formattedHistory, newMessage];
         let response = (await getGeminiResponse(userInput, updatedHistory)).replace(/[()\n\t\r]/g,"");
@@ -192,7 +198,7 @@ export default function Gemini({ paragraph, setParagraph, botResponse, setBotRes
             setChatHistory((prevHistory) => prevHistory.map((entry, index) => 
                 index === prevHistory.length - 1 ? { ...entry, bot: null } : entry
             ));
-        // Handle other chat messages
+        // Handle other message responses
         } else {
             setBotResponse(response);
             setParagraph({ text: null });

@@ -31,23 +31,27 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
   }
 
   // Helper function to sanitize text
+  // @paragraph (string): String to sanitize
+  // Return: (string): Sanitized string
   function sanitizeParagraph(paragraph) {
     return paragraph.replace(/[^\w\s]/gi, '').toLowerCase();
   }
 
+  // Helper function to reset timer
   function clearEffects() {
     clearInterval(timer);
     document.getElementById("typingtimer").innerHTML = "0";
     timer = null;
   }
 
-  // Initiate test on paragraph update
+  // When paragraph is updated, generate a typing test
   useEffect(() => {
     if (!paragraph.text) return
     clearEffects();
     document.getElementById("typingtestcontainer").style.display = 'block';
     document.getElementById("resultscontainer").style.display = 'none';
 
+    // Add listener for key presses
     if (!keyUp) {
       document.getElementById("typingtest").addEventListener('keyup', keyPress);
       keyUp = true;
@@ -58,6 +62,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     populateWords(paragraph);
   }, [paragraph]);
 
+  // Gets the results of the typing test and updates results page UI as well as 'results' useState
   function getResults() {
     console.log(analytics);
     const totalTime = (new Date()).getTime() - startTime;
@@ -76,6 +81,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     updateResults(wpm, accuracy, analytics.missedLetters, analytics.slowLetters);
   }
   
+  // End the typing test by cleaning up and processing results
   function endTest() {
     getResults();
     clearEffects();
@@ -85,6 +91,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     keyUp = false;
   }
 
+  // Processes keypresses
+  // @event (Object): event object from eventListener
   const keyPress = (event) => {
     const key = event.key;
     const isSpace = key == ' ';
@@ -100,6 +108,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     const isFirstLetter = currentLetter == currentWord.firstChild;
     const currentTime = (new Date()).getTime();
 
+    // Start timer if timer does not currently exist
     if (!timer && !isBackspace) {
       startTime = (new Date()).getTime();
       lastKeyStroke = startTime;
@@ -116,6 +125,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     // Increment characters typed count
     analytics.totalLetters++;
     
+    // Count time elapsed since last keystroke
     const lapsedTime = currentTime - lastKeyStroke;
     lastKeyStroke = currentTime;
     
@@ -124,7 +134,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       // Condition: Not at the end of the word
       if (currentLetter) {
         addClass(currentLetter, key === expectedKey ? correctKeyClasses: wrongKeyClasses);
-        // Analytics
+        // Update user analytics
         if (key == expectedKey)
           analytics.correctLetters++;
         else
@@ -155,7 +165,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       } else if (currentWord.nextSibling) {
         analytics.correctLetters++;
       }
-      // Move onto next word
+      // Move onto next word if current word is not the last word in the paragraph
+      // Ends test if there are no more words
       removeClass(currentWord, 'current');
       if (currentLetter) {
         removeClass(currentLetter, 'current');
@@ -186,6 +197,7 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
         removeClass(currentLetter.previousSibling, correctKeyClasses.concat(wrongKeyClasses));
         if (currentLetter.classList.contains("extraletter"))
           currentLetter.remove();
+      // Condition: On the last letter of a word
       } else if (!currentLetter) {
         if (currentWord.lastChild.classList.contains("extraletter")) {
           currentWord.lastChild.remove();
@@ -196,11 +208,13 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
       }
     }
     analytics.averageTime = ((analytics.totalLetters-1) * analytics.averageTime + lapsedTime) / analytics.totalLetters;
+    // End the test if there are no more words
     if (!currentWord.nextSibling && !currentLetter.nextSibling) {
       endTest();
     }
 
-    // Autoscroll words
+    // Check if cursor is below a certain height on the page
+    // If true scroll down on the typing test to recenter cursor
     const typingTest = document.getElementById('typingtest');
     const typingRect = typingTest.getBoundingClientRect();
     if (currentWord.getBoundingClientRect().top > typingRect.top + (typingRect.height / 2)) {     
@@ -226,6 +240,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     }
   };
 
+  // Adds class(es) to a DOM element's Classlist
+  // @element (HTML DOM Object): Element to change
+  // @name (array | string): name(s) of classes to change
   function addClass(element, name) {
     if (Array.isArray(name)) {
       element.classList.add(...name);
@@ -234,6 +251,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     }
   }
 
+  // Removes class(es) to a DOM element's Classlist
+  // @element (HTML DOM Object): Element to change
+  // @name (array | string): name(s) of classes to change
   function removeClass(element, name) {
     if (Array.isArray(name)) {
       element.classList.remove(...name);
@@ -242,6 +262,9 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     }
   }
 
+  // Constructs the HTML structure of a word in the typing test
+  // @word (string): a single word to format into HTML
+  // Return: (HTML DOM Object) HTML element containing separated letters
   function formatWord(word) {
     const newWord = document.createElement("div");
     const letters = word.toLowerCase().split('');
@@ -257,6 +280,8 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
     return newWord;
   }
 
+  // Construct HTML structure of the typing test
+  // @paragraph (object): contains the string to format into HTML
   function populateWords(paragraph) {
     if (paragraph.text == null) return;
 
@@ -275,34 +300,6 @@ export default function Typing({ paragraph, results, updateParagraph, updateResu
 
   return (
     <>
-      {/*
-      <h1>This is a Typing Test</h1>
-      <button onClick={()=>updateParagraph(sampleText)}>Test Button</button>
-      <div id="typingtestcontainer" className="hidden">
-        <div id="typingtestheader">
-          <div id="typingtimer">{typingTime / 1000}</div>
-        </div>
-        <div id="typingtest" tabIndex="0" className="group relative leading-relaxed h-24 overflow-hidden bg-red-300 focus:bg-blue-300">
-          <div id="words" className="blur-sm group-focus:blur-none"></div>
-          <div id="cursor" className="blur-sm group-focus:blur-none fixed w-0.5 h-6 bg-black"></div>
-          <div id="focus-error" className="absolute pt-8 text-center inset-0 select-none group-focus:hidden">Click here to resume</div>
-        </div>
-      </div>
-      <div id="resultscontainer" className="hidden">
-        <h1>Results</h1>
-        <div>
-          <span>WPM</span>
-          <span id="wpm">0</span>
-        </div>
-        <div>
-          <span>ACC</span>
-          <span id="accuracy">0%</span>
-        </div>
-        <div>
-          <span id="elapsedTime">0 Seconds</span>
-        </div>
-        </div>
-        */}
         <div className="flex flex-[2_1_0] flex-col bg-zinc-800 justify-center items-center overflow-auto sm:min-w-[50%] md:min-w-[55%] lg:min-w-0">
               <div className="bg-gray-700 lg:w-[50vw] h-[40vh] w-full  items-center justify-center flex rounded-md shadow-md">
                 <div id="typingtestcontainer" className="hidden">
